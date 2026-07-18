@@ -11,6 +11,17 @@ Node: [node name & ID]
 Contact: [your name or email]
 If this equipment is damaged or needs to be moved, please get in touch.`;
 
+const VCARD = `BEGIN:VCARD
+VERSION:3.0
+N:Doe;Jane;;;
+FN:Jane Doe
+ORG:Example Org
+TITLE:Field Technician
+TEL;TYPE=CELL:+1 555 0100
+EMAIL:jane.doe@example.com
+URL:https://example.com
+END:VCARD`;
+
 const FACTORY = {
   data: BOX_TAG,
   ecc: "Q",
@@ -48,6 +59,9 @@ const PRESET_DATA = {
   channel: "[paste the contact/channel share link from the MeshCore app here]",
   node: "MESHCORE NODE\nName: Repeater-West\nID: a1b2c3d4\nFreq: 915 MHz\nRole: Repeater",
   wifi: "WIFI:T:WPA;S:MeshGateway;P:changeme123;;",
+  website: "https://example.com",
+  social: "https://instagram.com/yourhandle",
+  vcard: VCARD,
   text: "Hello from the mesh",
 };
 
