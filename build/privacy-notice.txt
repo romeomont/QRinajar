@@ -1,0 +1,12 @@
+MESH QR GENERATOR — PRIVACY NOTICE
+
+This app runs 100% offline.
+
+  * No tracking or analytics
+  * No ads
+  * No internet connection is ever made
+  * No account or sign-in required
+  * Everything you enter (text, images, saved presets) stays on this
+    computer and is never uploaded or transmitted anywhere
+
+Click "I Agree" to continue installing.

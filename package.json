@@ -55,7 +55,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "deleteAppDataOnUninstall": true,
-      "uninstallDisplayName": "${productName}"
+      "uninstallDisplayName": "${productName}",
+      "license": "build/privacy-notice.txt"
     }
   }
 }
