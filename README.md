@@ -1,5 +1,9 @@
 # QR Code Generator
 
+<p align="center">
+  <img src="assets/logo.png" alt="QR Code Generator logo" width="180">
+</p>
+
 Fully offline QR code generator with heavy styling control (shapes, colors,
 gradients, corner eyes, center logo, caption + border) and content presets
 for common use cases (website, plain text, Wi-Fi, vCard contact, social
