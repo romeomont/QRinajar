@@ -7,8 +7,8 @@ profile).
 
 Available two ways:
 
-- **Windows app** — installer or portable exe, no browser needed.
-- **Single HTML file** — `dist/qr-code-generator.html`, zero dependencies at
+- **Windows app** - installer or portable exe, no browser needed.
+- **Single HTML file** - `dist/qr-code-generator.html`, zero dependencies at
   runtime. Copy it to a laptop, phone, or USB stick and open it in any
   browser. No internet is ever used: the QR library (qr-code-styling), the
   scan-test decoder (jsQR), and all UI are inlined into the file.
@@ -17,18 +17,20 @@ Available two ways:
 
 Grab the latest build from `release/`:
 
-- **`QR Code Generator Installer.exe`** — installer. Run it, follow the
-  wizard (you can choose the install location), and it adds a Start Menu
-  entry plus a proper uninstaller. Uninstalling (via **Settings → Apps** or
-  `Uninstall QR Code Generator.exe` in the install folder) removes the app
-  files and its saved settings — nothing left behind.
-- **`QR Code Generator 1.0.0.exe`** — portable, no install. Just run it.
+- **`QR Code Generator Installer.exe`** - installer. Run it, follow the
+  wizard (you can choose the install location). During setup you can
+  optionally add a Start Menu entry and/or a Desktop shortcut - neither is
+  required. A proper uninstaller is included either way. Uninstalling (via
+  **Settings → Apps** or `Uninstall QR Code Generator.exe` in the install
+  folder) removes the app files, any shortcuts it created, and its saved
+  settings - nothing left behind.
+- **`QR Code Generator 1.0.0.exe`** - portable, no install. Just run it.
 
 The app is unsigned, so Windows SmartScreen will show a warning the first
 time it runs. Click **More info → Run anyway**. This is expected for
 small/independent apps without a paid code-signing certificate.
 
-To build these yourself (requires Windows Developer Mode enabled — see
+To build these yourself (requires Windows Developer Mode enabled - see
 "Building the Windows app" below):
 
 ```
@@ -39,24 +41,24 @@ npm run dist:win     # -> release/QR Code Generator Installer.exe (installer)
 
 ## Features
 
-- **Content presets** — website, plain text, Wi-Fi network, vCard contact
+- **Content presets** - website, plain text, Wi-Fi network, vCard contact
   card, social profile
-- **Shape & layout** — square or circle overall shape, size, quiet-zone margin
-- **Module styles** — square, dots, rounded, extra-rounded, classy, classy-rounded
-- **Colors** — solid or linear/radial gradient dots, custom corner-eye colors,
+- **Shape & layout** - square or circle overall shape, size, quiet-zone margin
+- **Module styles** - square, dots, rounded, extra-rounded, classy, classy-rounded
+- **Colors** - solid or linear/radial gradient dots, custom corner-eye colors,
   solid or transparent background
-- **Corner eyes** — independent outer/inner eye style and color
-- **Center logo** — drag & drop any image (processed locally via FileReader,
+- **Corner eyes** - independent outer/inner eye style and color
+- **Center logo** - drag & drop any image (processed locally via FileReader,
   never uploaded), adjustable size/margin, optional dot clearing behind it
-- **Caption & border** — optional text under the QR code and a configurable
+- **Caption & border** - optional text under the QR code and a configurable
   card border/padding/corner-rounding, baked into every export (not just the
   on-screen preview)
-- **Export** — PNG / SVG / JPEG download, copy-to-clipboard — all include the
+- **Export** - PNG / SVG / JPEG download, copy-to-clipboard - all include the
   caption and border
-- **Test scan** — decodes the rendered code with jsQR in-page so you can verify
+- **Test scan** - decodes the rendered code with jsQR in-page so you can verify
   a style combo actually scans before printing. (The "Dots" style is the
   riskiest for scanners; the tester will tell you.)
-- **Presets** — save your styling as the default (localStorage, offline)
+- **Presets** - save your styling as the default (localStorage, offline)
 
 ## Rebuilding the HTML file
 

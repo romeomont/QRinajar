@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QR Code Generator — Offline QR Generator</title>
+<title>QR Code Generator - Offline QR Generator</title>
 <style>
   :root {
     --bg: #0d1117;
@@ -177,7 +177,7 @@
   <div class="logo">Q</div>
   <h1>QR Code Generator</h1>
   <div class="sub">
-    <span class="offline-badge">100% offline — no network used</span><br>
+    <span class="offline-badge">100% offline - no network used</span><br>
     single-file • fully offline QR generator
   </div>
 </header>
@@ -199,12 +199,12 @@
         </div>
         <label class="field" for="ecc">Error correction (higher = more reliable scan, denser code)</label>
         <select id="ecc">
-          <option value="L">L — 7% (max capacity)</option>
-          <option value="M" selected>M — 15% (recommended default)</option>
-          <option value="Q">Q — 25% (good with logo)</option>
-          <option value="H">H — 30% (best with logo)</option>
+          <option value="L">L - 7% (max capacity)</option>
+          <option value="M" selected>M - 15% (recommended default)</option>
+          <option value="Q">Q - 25% (good with logo)</option>
+          <option value="H">H - 30% (best with logo)</option>
         </select>
-        <div class="hint">Use Q or H when embedding a center logo. Long text makes a denser code — bump the size (px) and run "Test scan" before printing.</div>
+        <div class="hint">Use Q or H when embedding a center logo. Long text makes a denser code - bump the size (px) and run "Test scan" before printing.</div>
       </div>
     </details>
 
@@ -241,7 +241,7 @@
           <option value="classy">Classy</option>
           <option value="classy-rounded">Classy rounded</option>
         </select>
-        <div class="hint">"Dots" is the hardest style for scanners — use "Test scan" below the preview before printing.</div>
+        <div class="hint">"Dots" is the hardest style for scanners - use "Test scan" below the preview before printing.</div>
         <div class="row" style="margin-top:10px">
           <div>
             <label class="field" for="dot-color">Dot color</label>
@@ -337,7 +337,7 @@
       <div class="body">
         <div class="drop" id="logo-drop">
           <img id="logo-thumb" style="display:none" alt="">
-          <span id="logo-drop-text">Click or drop an image here (PNG/SVG/JPG)<br>stays on this device — never uploaded</span>
+          <span id="logo-drop-text">Click or drop an image here (PNG/SVG/JPG)<br>stays on this device - never uploaded</span>
         </div>
         <input type="file" id="logo-file" accept="image/*" style="display:none">
         <div id="logo-opts" style="display:none">
@@ -355,7 +355,7 @@
       <summary>BORDER &amp; CAPTION</summary>
       <div class="body">
         <label class="field" for="caption">Caption text (shown under the QR code)</label>
-        <textarea id="caption" spellcheck="false" style="min-height:48px" placeholder="e.g. Repeater-West — Mast 3"></textarea>
+        <textarea id="caption" spellcheck="false" style="min-height:48px" placeholder="e.g. Repeater-West - Mast 3"></textarea>
         <div class="grid2" style="margin-top:6px">
           <div>
             <label class="field">Caption color</label>
@@ -395,7 +395,7 @@
           <button class="btn ghost" id="save-preset">Save current as default</button>
           <button class="btn ghost" id="reset-preset">Reset to factory</button>
         </div>
-        <div class="hint">Saved in this browser's local storage — works offline.</div>
+        <div class="hint">Saved in this browser's local storage - works offline.</div>
       </div>
     </details>
 
@@ -415,7 +415,7 @@
     </div>
     <div id="scan-result" style="font-size:12.5px;max-width:420px;text-align:center;line-height:1.5"></div>
     <div class="footer-note">
-      Everything runs locally in this file — generate channel &amp; node codes at the repeater site,
+      Everything runs locally in this file - generate channel &amp; node codes at the repeater site,
       print them, laminate them, zip-tie them to the mast. No internet required, ever.
     </div>
   </div>

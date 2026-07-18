@@ -285,8 +285,8 @@ function refreshLogoUI() {
   $("logo-thumb").style.display = has ? "" : "none";
   if (has) $("logo-thumb").src = state.logo;
   $("logo-drop-text").innerHTML = has
-    ? "Logo loaded — click to replace"
-    : "Click or drop an image here (PNG/SVG/JPG)<br>stays on this device — never uploaded";
+    ? "Logo loaded - click to replace"
+    : "Click or drop an image here (PNG/SVG/JPG)<br>stays on this device - never uploaded";
   $("logo-opts").style.display = has ? "" : "none";
 }
 
@@ -501,14 +501,14 @@ $("test-scan").addEventListener("click", () => {
   const decoded = jsQR(img.data, img.width, img.height);
   const expected = $("data").value || " ";
   if (decoded && decoded.data === expected) {
-    out.textContent = "✓ Decodes correctly — safe to print";
+    out.textContent = "✓ Decodes correctly - safe to print";
     out.style.color = "#4ade80";
   } else if (decoded) {
-    out.textContent = "⚠ Decodes, but data mismatch — check payload";
+    out.textContent = "⚠ Decodes, but data mismatch - check payload";
     out.style.color = "#fbbf24";
   } else {
     out.textContent =
-      "✗ Test decoder failed — real phones may still scan it, but margin is thin. Try a different dot style, higher error correction, or more contrast.";
+      "✗ Test decoder failed - real phones may still scan it, but margin is thin. Try a different dot style, higher error correction, or more contrast.";
     out.style.color = "#f87171";
   }
 });

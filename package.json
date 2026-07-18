@@ -8,7 +8,7 @@
     "build": "node build.mjs",
     "start": "npm run build && electron .",
     "dist:win": "npm run build && electron-builder --win",
-    "package:win": "npm run build && electron-packager . \"QR Code Generator\" --platform=win32 --arch=x64 --out=release --overwrite"
+    "package:win": "npm run build && electron-packager . \"QR Code Generator\" --platform=win32 --arch=x64 --out=release --overwrite --icon=build/icon.ico"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +36,7 @@
       "output": "release"
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         {
           "target": "nsis",
@@ -57,7 +58,14 @@
       "deleteAppDataOnUninstall": true,
       "uninstallDisplayName": "${productName}",
       "license": "build/privacy-notice.txt",
-      "artifactName": "QR Code Generator Installer.exe"
+      "artifactName": "QR Code Generator Installer.exe",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "createDesktopShortcut": false,
+      "createStartMenuShortcut": false,
+      "include": "build/installer.nsh",
+      "warningsAsErrors": false
     }
   }
 }

@@ -20,5 +20,5 @@ const out = html.replace("/*__BUNDLE__*/", () => safeJs);
 mkdirSync("dist", { recursive: true });
 writeFileSync("dist/qr-code-generator.html", out);
 console.log(
-  `Built dist/qr-code-generator.html (${(out.length / 1024).toFixed(0)} KB) — fully offline, single file.`
+  `Built dist/qr-code-generator.html (${(out.length / 1024).toFixed(0)} KB), fully offline, single file.`
 );
