@@ -188,29 +188,23 @@
     <details class="section" open>
       <summary>CONTENT</summary>
       <div class="body">
-        <label class="field" for="data">Data / payload</label>
-        <textarea id="data" spellcheck="false" style="min-height:130px">LORA MESH EQUIPMENT - PLEASE READ
-This box is part of a community LoRa mesh radio network (MeshCore).
-It relays short low-power radio messages. Nothing hazardous or valuable inside.
-Site: [site / mast name]
-Node: [node name &amp; ID]
-Contact: [your name or email]
-If this equipment is damaged or needs to be moved, please get in touch.</textarea>
+        <label class="field" for="data">Text or link to encode</label>
+        <textarea id="data" spellcheck="false" style="min-height:130px">https://example.com</textarea>
         <div class="chips">
-          <span class="chip" data-preset="boxtag">Junction box tag</span>
-          <span class="chip" data-preset="channel">Channel/contact link</span>
-          <span class="chip" data-preset="node">Node contact</span>
-          <span class="chip" data-preset="wifi">Wi-Fi AP</span>
           <span class="chip" data-preset="website">Website</span>
-          <span class="chip" data-preset="social">Social profile</span>
-          <span class="chip" data-preset="vcard">vCard contact</span>
           <span class="chip" data-preset="text">Plain text</span>
+          <span class="chip" data-preset="wifi">Wi-Fi network</span>
+          <span class="chip" data-preset="vcard">Contact card (vCard)</span>
+          <span class="chip" data-preset="social">Social profile</span>
+          <span class="chip" data-preset="channel">MeshCore channel link</span>
+          <span class="chip" data-preset="node">MeshCore node info</span>
+          <span class="chip" data-preset="boxtag">MeshCore equipment tag</span>
         </div>
-        <label class="field" for="ecc">Error correction</label>
+        <label class="field" for="ecc">Error correction (higher = more reliable scan, denser code)</label>
         <select id="ecc">
           <option value="L">L — 7% (max capacity)</option>
-          <option value="M">M — 15%</option>
-          <option value="Q" selected>Q — 25% (good with logo)</option>
+          <option value="M" selected>M — 15% (recommended default)</option>
+          <option value="Q">Q — 25% (good with logo)</option>
           <option value="H">H — 30% (best with logo)</option>
         </select>
         <div class="hint">Use Q or H when embedding a center logo. Long text makes a denser code — bump the size (px) and run "Test scan" before printing.</div>

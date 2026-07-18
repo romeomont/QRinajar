@@ -23,8 +23,8 @@ URL:https://example.com
 END:VCARD`;
 
 const FACTORY = {
-  data: BOX_TAG,
-  ecc: "Q",
+  data: "https://example.com",
+  ecc: "M",
   shape: "square",
   size: 800,
   margin: 16,
@@ -62,7 +62,7 @@ const PRESET_DATA = {
   website: "https://example.com",
   social: "https://instagram.com/yourhandle",
   vcard: VCARD,
-  text: "Hello from the mesh",
+  text: "Hello, world!",
 };
 
 const STORE_KEY = "mesh-qr-settings-v1";
