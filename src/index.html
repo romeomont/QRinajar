@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mesh QR — Offline QR Generator</title>
+<title>QR Code Generator — Offline QR Generator</title>
 <style>
   :root {
     --bg: #0d1117;
@@ -175,10 +175,10 @@
 <body>
 <header>
   <div class="logo">Q</div>
-  <h1>Mesh QR Generator</h1>
+  <h1>QR Code Generator</h1>
   <div class="sub">
     <span class="offline-badge">100% offline — no network used</span><br>
-    single-file • LoRa mesh field tool
+    single-file • fully offline QR generator
   </div>
 </header>
 
@@ -196,9 +196,6 @@
           <span class="chip" data-preset="wifi">Wi-Fi network</span>
           <span class="chip" data-preset="vcard">Contact card (vCard)</span>
           <span class="chip" data-preset="social">Social profile</span>
-          <span class="chip" data-preset="channel">MeshCore channel link</span>
-          <span class="chip" data-preset="node">MeshCore node info</span>
-          <span class="chip" data-preset="boxtag">MeshCore equipment tag</span>
         </div>
         <label class="field" for="ecc">Error correction (higher = more reliable scan, denser code)</label>
         <select id="ecc">

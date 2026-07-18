@@ -3,14 +3,6 @@ import jsQR from "jsqr";
 
 const $ = (id) => document.getElementById(id);
 
-const BOX_TAG = `LORA MESH EQUIPMENT - PLEASE READ
-This box is part of a community LoRa mesh radio network (MeshCore).
-It relays short low-power radio messages. Nothing hazardous or valuable inside.
-Site: [site / mast name]
-Node: [node name & ID]
-Contact: [your name or email]
-If this equipment is damaged or needs to be moved, please get in touch.`;
-
 const VCARD = `BEGIN:VCARD
 VERSION:3.0
 N:Doe;Jane;;;
@@ -55,17 +47,14 @@ const FACTORY = {
 };
 
 const PRESET_DATA = {
-  boxtag: BOX_TAG,
-  channel: "[paste the contact/channel share link from the MeshCore app here]",
-  node: "MESHCORE NODE\nName: Repeater-West\nID: a1b2c3d4\nFreq: 915 MHz\nRole: Repeater",
-  wifi: "WIFI:T:WPA;S:MeshGateway;P:changeme123;;",
+  wifi: "WIFI:T:WPA;S:MyWiFiNetwork;P:changeme123;;",
   website: "https://example.com",
   social: "https://instagram.com/yourhandle",
   vcard: VCARD,
   text: "Hello, world!",
 };
 
-const STORE_KEY = "mesh-qr-settings-v1";
+const STORE_KEY = "qr-code-generator-settings-v1";
 
 function readUI() {
   return {
@@ -466,7 +455,7 @@ function canvasToBlob(canvas, mime, quality) {
 function filename() {
   const d = new Date();
   const stamp = d.toISOString().slice(0, 10);
-  return "mesh-qr-" + stamp;
+  return "qr-code-" + stamp;
 }
 async function download(ext) {
   const s = readUI();

@@ -18,7 +18,7 @@ const safeJs = js.replace(/<\/script/gi, "<\\/script");
 const out = html.replace("/*__BUNDLE__*/", () => safeJs);
 
 mkdirSync("dist", { recursive: true });
-writeFileSync("dist/mesh-qr-generator.html", out);
+writeFileSync("dist/qr-code-generator.html", out);
 console.log(
-  `Built dist/mesh-qr-generator.html (${(out.length / 1024).toFixed(0)} KB) — fully offline, single file.`
+  `Built dist/qr-code-generator.html (${(out.length / 1024).toFixed(0)} KB) — fully offline, single file.`
 );

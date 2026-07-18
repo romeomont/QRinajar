@@ -1,14 +1,14 @@
-# Mesh QR Generator
+# QR Code Generator
 
 Fully offline QR code generator with heavy styling control (shapes, colors,
 gradients, corner eyes, center logo, caption + border) and content presets
-for general use (website, Wi-Fi, vCard, social) as well as LoRa mesh field
-work (MeshCore channel/contact links, node info, junction box tags).
+for common use cases (website, plain text, Wi-Fi, vCard contact, social
+profile).
 
 Available two ways:
 
 - **Windows app** — installer or portable exe, no browser needed.
-- **Single HTML file** — `dist/mesh-qr-generator.html`, zero dependencies at
+- **Single HTML file** — `dist/qr-code-generator.html`, zero dependencies at
   runtime. Copy it to a laptop, phone, or USB stick and open it in any
   browser. No internet is ever used: the QR library (qr-code-styling), the
   scan-test decoder (jsQR), and all UI are inlined into the file.
@@ -17,12 +17,12 @@ Available two ways:
 
 Grab the latest build from `release/`:
 
-- **`Mesh QR Generator Setup 1.0.0.exe`** — installer. Run it, follow the
+- **`QR Code Generator Installer.exe`** — installer. Run it, follow the
   wizard (you can choose the install location), and it adds a Start Menu
   entry plus a proper uninstaller. Uninstalling (via **Settings → Apps** or
-  `Uninstall Mesh QR Generator.exe` in the install folder) removes the app
+  `Uninstall QR Code Generator.exe` in the install folder) removes the app
   files and its saved settings — nothing left behind.
-- **`Mesh QR Generator 1.0.0.exe`** — portable, no install. Just run it.
+- **`QR Code Generator 1.0.0.exe`** — portable, no install. Just run it.
 
 The app is unsigned, so Windows SmartScreen will show a warning the first
 time it runs. Click **More info → Run anyway**. This is expected for
@@ -33,15 +33,14 @@ To build these yourself (requires Windows Developer Mode enabled — see
 
 ```
 npm install
-npm run dist:win     # -> release/Mesh QR Generator Setup 1.0.0.exe (installer)
-                      #    release/Mesh QR Generator 1.0.0.exe (portable)
+npm run dist:win     # -> release/QR Code Generator Installer.exe (installer)
+                      #    release/QR Code Generator 1.0.0.exe (portable)
 ```
 
 ## Features
 
 - **Content presets** — website, plain text, Wi-Fi network, vCard contact
-  card, social profile, plus MeshCore-specific presets (channel/contact link,
-  node info, equipment tag)
+  card, social profile
 - **Shape & layout** — square or circle overall shape, size, quiet-zone margin
 - **Module styles** — square, dots, rounded, extra-rounded, classy, classy-rounded
 - **Colors** — solid or linear/radial gradient dots, custom corner-eye colors,
@@ -63,7 +62,7 @@ npm run dist:win     # -> release/Mesh QR Generator Setup 1.0.0.exe (installer)
 
 ```
 npm install
-npm run build     # -> dist/mesh-qr-generator.html
+npm run build     # -> dist/qr-code-generator.html
 ```
 
 `build.mjs` bundles `src/main.js` with esbuild and inlines it into
@@ -72,12 +71,12 @@ npm run build     # -> dist/mesh-qr-generator.html
 ## Building the Windows app
 
 The Electron shell lives in `electron/main.js` and just loads
-`dist/mesh-qr-generator.html` in a native window.
+`dist/qr-code-generator.html` in a native window.
 
 ```
 npm start            # build + launch in dev mode
-npm run package:win   # -> release/Mesh QR Generator-win32-x64/ (portable folder, no installer)
-npm run dist:win      # -> release/Mesh QR Generator Setup 1.0.0.exe (installer) + portable exe
+npm run package:win   # -> release/QR Code Generator-win32-x64/ (portable folder, no installer)
+npm run dist:win      # -> release/QR Code Generator Installer.exe (installer) + portable exe
 ```
 
 `dist:win` (electron-builder, NSIS) needs Windows Developer Mode turned on

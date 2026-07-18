@@ -12,7 +12,7 @@ function createWindow() {
   });
 
   Menu.setApplicationMenu(null);
-  win.loadFile(path.join(__dirname, "..", "dist", "mesh-qr-generator.html"));
+  win.loadFile(path.join(__dirname, "..", "dist", "qr-code-generator.html"));
 }
 
 app.whenReady().then(() => {

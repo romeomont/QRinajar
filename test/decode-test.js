@@ -1,7 +1,7 @@
 import QRCodeStyling from "qr-code-styling";
 import jsQR from "jsqr";
 
-const DATA = "https://meshtastic.org/e/#ChMSAQEaB01lc2hOZXQlB0xvbmdGYXN0";
+const DATA = "https://example.com/sample-payload-for-scan-testing";
 
 // A red 64x64 PNG dot as a stand-in logo (generated below on a canvas).
 function makeLogo() {
