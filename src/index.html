@@ -58,15 +58,26 @@
     align-items: center; justify-content: center;
     gap: 20px; padding: 30px;
   }
-  #qr-preview {
-    background: #fff;
-    border-radius: 14px;
-    padding: 0;
+  #qr-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
     box-shadow: 0 8px 40px rgba(0,0,0,.5);
+    box-sizing: border-box;
+  }
+  #qr-preview {
     line-height: 0;
     overflow: hidden;
+    border-radius: inherit;
   }
   #qr-preview canvas, #qr-preview svg { max-width: min(70vw, 460px); height: auto !important; width: auto; }
+  #qr-caption {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-weight: 600;
+    text-align: center;
+    white-space: pre-wrap;
+    max-width: min(70vw, 460px);
+  }
 
   details.section {
     border: 1px solid var(--border);
@@ -221,8 +232,6 @@ If this equipment is damaged or needs to be moved, please get in touch.</textare
         </div>
         <label class="field" for="margin">Quiet-zone margin <span class="val" id="margin-val">16</span></label>
         <input type="range" id="margin" min="0" max="80" value="16">
-        <label class="field" for="border-radius">Preview corner rounding <span class="val" id="radius-val">14</span></label>
-        <input type="range" id="border-radius" min="0" max="60" value="14">
       </div>
     </details>
 
@@ -348,6 +357,43 @@ If this equipment is damaged or needs to be moved, please get in touch.</textare
       </div>
     </details>
 
+    <details class="section" open>
+      <summary>BORDER &amp; CAPTION</summary>
+      <div class="body">
+        <label class="field" for="caption">Caption text (shown under the QR code)</label>
+        <textarea id="caption" spellcheck="false" style="min-height:48px" placeholder="e.g. Repeater-West — Mast 3"></textarea>
+        <div class="grid2" style="margin-top:6px">
+          <div>
+            <label class="field">Caption color</label>
+            <input class="fixed" type="color" id="caption-color" value="#0d1b2a">
+          </div>
+          <div>
+            <label class="field">Caption size <span class="val" id="caption-size-val">20</span></label>
+            <input type="range" id="caption-size" min="10" max="48" value="20">
+          </div>
+        </div>
+
+        <label class="inline-check" style="margin-top:16px"><input type="checkbox" id="border-enabled" checked> Show border around card</label>
+        <div id="border-opts">
+          <div class="grid2" style="margin-top:6px">
+            <div>
+              <label class="field">Border color</label>
+              <input class="fixed" type="color" id="border-color" value="#0d1b2a">
+            </div>
+            <div>
+              <label class="field">Border width <span class="val" id="border-width-val">4</span></label>
+              <input type="range" id="border-width" min="0" max="20" value="4">
+            </div>
+          </div>
+        </div>
+        <label class="field" for="border-radius">Card corner rounding <span class="val" id="radius-val">14</span></label>
+        <input type="range" id="border-radius" min="0" max="60" value="14">
+        <label class="field" for="card-padding">Card padding <span class="val" id="card-padding-val">24</span></label>
+        <input type="range" id="card-padding" min="0" max="60" value="24">
+        <div class="hint">Border and caption are baked into every download (PNG/JPEG/SVG) and the clipboard copy, not just the preview.</div>
+      </div>
+    </details>
+
     <details class="section">
       <summary>PRESETS</summary>
       <div class="body">
@@ -362,7 +408,10 @@ If this equipment is damaged or needs to be moved, please get in touch.</textare
   </div>
 
   <div class="preview-pane">
-    <div id="qr-preview"></div>
+    <div id="qr-card">
+      <div id="qr-preview"></div>
+      <div id="qr-caption"></div>
+    </div>
     <div class="btn-row">
       <button class="btn" id="dl-png">Download PNG</button>
       <button class="btn" id="dl-svg">Download SVG</button>

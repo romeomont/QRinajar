@@ -1,11 +1,14 @@
 {
-  "name": "qr",
+  "name": "mesh-qr-generator",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Offline QR code generator for MeshCore field work, packaged as a Windows desktop app.",
+  "main": "electron/main.js",
   "scripts": {
     "test": "esbuild test/decode-test.js --bundle --format=iife --outfile=test/decode-test-bundle.js",
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "start": "npm run build && electron .",
+    "dist:win": "npm run build && electron-builder --win",
+    "package:win": "npm run build && electron-packager . \"Mesh QR Generator\" --platform=win32 --arch=x64 --out=release --overwrite"
   },
   "keywords": [],
   "author": "",
@@ -16,7 +19,41 @@
     "qr-code-styling": "^1.9.2"
   },
   "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "electron-packager": "^17.1.2",
     "jsqr": "^1.4.0",
     "pngjs": "^7.0.0"
+  },
+  "build": {
+    "appId": "com.romeomont.meshqrgenerator",
+    "productName": "Mesh QR Generator",
+    "files": [
+      "electron/**/*",
+      "dist/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
