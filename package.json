@@ -56,7 +56,8 @@
       "allowToChangeInstallationDirectory": true,
       "deleteAppDataOnUninstall": true,
       "uninstallDisplayName": "${productName}",
-      "license": "build/privacy-notice.txt"
+      "license": "build/privacy-notice.txt",
+      "artifactName": "QR Code Generator Installer.exe"
     }
   }
 }
