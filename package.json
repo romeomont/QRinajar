@@ -1,0 +1,22 @@
+{
+  "name": "qr",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "esbuild test/decode-test.js --bundle --format=iife --outfile=test/decode-test-bundle.js",
+    "build": "node build.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "esbuild": "^0.28.1",
+    "qr-code-styling": "^1.9.2"
+  },
+  "devDependencies": {
+    "jsqr": "^1.4.0",
+    "pngjs": "^7.0.0"
+  }
+}
