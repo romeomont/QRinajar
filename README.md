@@ -76,8 +76,6 @@ Other things worth knowing:
 - **Library** - saved presets (reachable from any step via the toolbar),
   with swipe-to-delete and an Edit button, plus "Save current design" and
   "Reset to factory".
-- **Scan self-test** - same idea as the web app's jsQR check, but using
-  Vision's `VNDetectBarcodesRequest` to decode the rendered code offline.
 - **QR scanner** - a floating button on every step opens the camera to scan
   a QR code and open it in Safari; first use explains why the camera
   permission is needed before the system prompt appears.
