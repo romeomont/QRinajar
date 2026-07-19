@@ -49,6 +49,7 @@ private struct FlowStepView: View {
     @Environment(QRDesign.self) private var design
     @Environment(PresetStore.self) private var store
     @State private var showLibrary = false
+    @State private var showSettings = false
     @State private var showSaveAlert = false
     @State private var saveName = ""
 
@@ -98,7 +99,12 @@ private struct FlowStepView: View {
         .navigationBarTitleDisplayMode(.inline)
         .background(BackdropGradient())
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItemGroup(placement: .topBarTrailing) {
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
                 Button {
                     showLibrary = true
                 } label: {
@@ -108,6 +114,9 @@ private struct FlowStepView: View {
         }
         .sheet(isPresented: $showLibrary) {
             LibraryView()
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView()
         }
     }
 
