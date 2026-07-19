@@ -236,6 +236,17 @@ struct ContentTypePicker: View {
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("QR codes can be used for lots of things. Is what you're making one of these?")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            typeGrid
+        }
+    }
+
+    private var typeGrid: some View {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(orderedTypes) { t in
                 Button {
