@@ -13,12 +13,14 @@ const result = await build({
 const js = result.outputFiles[0].text;
 const html = readFileSync("src/index.html", "utf8");
 const { version } = JSON.parse(readFileSync("package.json", "utf8"));
+const logoDataUri = `data:image/png;base64,${readFileSync("assets/logo-64.png").toString("base64")}`;
 
 // Inline the bundle; escape any </script> sequences inside the JS.
 const safeJs = js.replace(/<\/script/gi, "<\\/script");
 const out = html
   .replace("/*__BUNDLE__*/", () => safeJs)
-  .replace("__VERSION__", version);
+  .replace("__VERSION__", version)
+  .replace("__LOGO__", () => logoDataUri);
 
 mkdirSync("dist", { recursive: true });
 writeFileSync("dist/qrinajar.html", out);

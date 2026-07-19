@@ -29,11 +29,17 @@ function createMainWindow() {
     width: 1100,
     height: 800,
     icon: path.join(__dirname, "icon.ico"),
+    frame: false,
+    backgroundColor: "#0d1117",
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      preload: path.join(__dirname, "preload-main.js"),
     },
   });
+
+  win.on("maximize", () => win.webContents.send("window-maximized-change", true));
+  win.on("unmaximize", () => win.webContents.send("window-maximized-change", false));
 
   Menu.setApplicationMenu(null);
   win.loadFile(path.join(__dirname, "..", "dist", "qrinajar.html"));
@@ -71,6 +77,21 @@ function createSplashWindow(onDone) {
 
 ipcMain.on("splash-dont-show-again", (_event, checked) => {
   dontShowAgainChoice = checked;
+});
+
+ipcMain.on("window-minimize", (event) => {
+  BrowserWindow.fromWebContents(event.sender)?.minimize();
+});
+
+ipcMain.on("window-toggle-maximize", (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender);
+  if (!win) return;
+  if (win.isMaximized()) win.unmaximize();
+  else win.maximize();
+});
+
+ipcMain.on("window-close", (event) => {
+  BrowserWindow.fromWebContents(event.sender)?.close();
 });
 
 app.whenReady().then(() => {

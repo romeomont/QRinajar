@@ -17,6 +17,14 @@
     --radius: 10px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) var(--bg);
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 20px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
   body {
     font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
     background: var(--bg);
@@ -28,15 +36,49 @@
     padding: 14px 22px;
     border-bottom: 1px solid var(--border);
     background: var(--panel);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    -webkit-app-region: drag;
   }
   header .logo {
     width: 34px; height: 34px; border-radius: 8px;
-    background: linear-gradient(135deg, var(--accent), #7b5ee8);
-    display: grid; place-items: center;
-    font-weight: 700; font-size: 18px; color: #fff;
+    display: block;
   }
-  header h1 { font-size: 17px; font-weight: 600; }
-  header .sub { font-size: 12px; color: var(--muted); margin-left: auto; text-align: right; }
+  header h1 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    background: linear-gradient(135deg, var(--accent), #7b5ee8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: var(--text);
+  }
+  header .sub { font-size: 12px; color: var(--muted); text-align: right; }
+
+  .win-controls {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+    margin-left: auto;
+    gap: 2px;
+    -webkit-app-region: no-drag;
+  }
+  .win-btn {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 34px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .win-btn:hover { background: var(--panel2); color: var(--text); }
+  .win-btn.close:hover { background: #e5484d; color: #fff; }
+  .win-btn svg { width: 12px; height: 12px; }
 
   .layout {
     display: grid;
@@ -57,6 +99,8 @@
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     gap: 20px; padding: 30px;
+    overflow-y: auto;
+    max-height: calc(100vh - 63px);
   }
   #qr-card {
     display: inline-flex;
@@ -79,27 +123,42 @@
     max-width: min(70vw, 460px);
   }
 
-  details.section {
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--panel);
+    z-index: 5;
+  }
+  .tab-btn {
+    cursor: pointer;
+    padding: 7px 12px;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: .3px;
+    color: var(--muted);
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    user-select: none;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .tab-btn:hover { color: var(--text); border-color: var(--accent); }
+  .tab-btn.active { color: #06202e; background: var(--accent); border-color: var(--accent); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  .section {
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    margin-bottom: 12px;
     background: var(--panel2);
     overflow: hidden;
   }
-  details.section summary {
-    cursor: pointer;
-    padding: 11px 14px;
-    font-size: 13px; font-weight: 600;
-    letter-spacing: .4px;
-    color: var(--text);
-    user-select: none;
-    list-style: none;
-    display: flex; align-items: center; gap: 8px;
-  }
-  details.section summary::-webkit-details-marker { display: none; }
-  details.section summary::before { content: "▸"; color: var(--accent); transition: transform .15s; }
-  details.section[open] summary::before { transform: rotate(90deg); }
-  details.section .body { padding: 4px 14px 14px; }
+  .section .body { padding: 14px; }
 
   label.field { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
   textarea, select, input[type=text], input[type=number] {
@@ -169,16 +228,37 @@
 </head>
 <body>
 <header>
-  <div class="logo">Q</div>
+  <img class="logo" src="__LOGO__" alt="QRinajar">
   <h1>QRinajar</h1>
   <div class="sub">v__VERSION__</div>
+  <div class="win-controls">
+    <button class="win-btn" id="win-minimize" title="Minimize" aria-label="Minimize">
+      <svg viewBox="0 0 12 12"><path d="M1 6h10" stroke="currentColor" stroke-width="1.2"/></svg>
+    </button>
+    <button class="win-btn" id="win-maximize" title="Maximize" aria-label="Maximize">
+      <svg viewBox="0 0 12 12"><rect x="1.5" y="1.5" width="9" height="9" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+    </button>
+    <button class="win-btn close" id="win-close" title="Close" aria-label="Close">
+      <svg viewBox="0 0 12 12"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.2"/></svg>
+    </button>
+  </div>
 </header>
 
 <div class="layout">
   <div class="controls">
 
-    <details class="section" open>
-      <summary>CONTENT</summary>
+    <div class="tabs">
+      <div class="tab-btn active" data-tab="content">Content</div>
+      <div class="tab-btn" data-tab="shape">Shape &amp; layout</div>
+      <div class="tab-btn" data-tab="module">Module style</div>
+      <div class="tab-btn" data-tab="eyes">Corner eyes</div>
+      <div class="tab-btn" data-tab="bg">Background</div>
+      <div class="tab-btn" data-tab="logo">Center logo</div>
+      <div class="tab-btn" data-tab="border">Border &amp; caption</div>
+      <div class="tab-btn" data-tab="presets">Presets</div>
+    </div>
+
+    <div class="section tab-panel active" data-tab="content">
       <div class="body">
         <label class="field" for="data">Text or link to encode</label>
         <textarea id="data" spellcheck="false" style="min-height:130px">https://example.com</textarea>
@@ -198,10 +278,9 @@
         </select>
         <div class="hint">Use Q or H when embedding a center logo. Long text makes a denser code - bump the size (px) and run "Test scan" before printing.</div>
       </div>
-    </details>
+    </div>
 
-    <details class="section" open>
-      <summary>SHAPE &amp; LAYOUT</summary>
+    <div class="section tab-panel" data-tab="shape">
       <div class="body">
         <div class="grid2">
           <div>
@@ -219,10 +298,9 @@
         <label class="field" for="margin">Quiet-zone margin <span class="val" id="margin-val">16</span></label>
         <input type="range" id="margin" min="0" max="80" value="16">
       </div>
-    </details>
+    </div>
 
-    <details class="section" open>
-      <summary>MODULE STYLE (inner details)</summary>
+    <div class="section tab-panel" data-tab="module">
       <div class="body">
         <label class="field" for="dot-style">Dot style</label>
         <select id="dot-style">
@@ -262,10 +340,9 @@
           <input type="range" id="gradient-rot" min="0" max="360" value="45">
         </div>
       </div>
-    </details>
+    </div>
 
-    <details class="section" open>
-      <summary>CORNER EYES</summary>
+    <div class="section tab-panel" data-tab="eyes">
       <div class="body">
         <div class="grid2">
           <div>
@@ -306,10 +383,9 @@
           </div>
         </div>
       </div>
-    </details>
+    </div>
 
-    <details class="section" open>
-      <summary>BACKGROUND</summary>
+    <div class="section tab-panel" data-tab="bg">
       <div class="body">
         <div class="row">
           <div>
@@ -322,10 +398,9 @@
         </div>
         <label class="inline-check"><input type="checkbox" id="bg-transparent"> Transparent background</label>
       </div>
-    </details>
+    </div>
 
-    <details class="section" open>
-      <summary>CENTER LOGO</summary>
+    <div class="section tab-panel" data-tab="logo">
       <div class="body">
         <div class="drop" id="logo-drop">
           <img id="logo-thumb" style="display:none" alt="">
@@ -341,10 +416,9 @@
           <button class="btn ghost" id="logo-remove" style="margin-top:10px;width:100%">Remove logo</button>
         </div>
       </div>
-    </details>
+    </div>
 
-    <details class="section" open>
-      <summary>BORDER &amp; CAPTION</summary>
+    <div class="section tab-panel" data-tab="border">
       <div class="body">
         <label class="field" for="caption">Caption text (shown under the QR code)</label>
         <textarea id="caption" spellcheck="false" style="min-height:48px" placeholder="e.g. Repeater-West - Mast 3"></textarea>
@@ -378,10 +452,9 @@
         <input type="range" id="card-padding" min="0" max="60" value="24">
         <div class="hint">Border and caption are baked into every download (PNG/JPEG/SVG) and the clipboard copy, not just the preview.</div>
       </div>
-    </details>
+    </div>
 
-    <details class="section">
-      <summary>PRESETS</summary>
+    <div class="section tab-panel" data-tab="presets">
       <div class="body">
         <div class="btn-row" style="justify-content:flex-start">
           <button class="btn ghost" id="save-preset">Save current as default</button>
@@ -389,7 +462,7 @@
         </div>
         <div class="hint">Saved in this browser's local storage - works offline.</div>
       </div>
-    </details>
+    </div>
 
   </div>
 
@@ -413,6 +486,22 @@
   </div>
 </div>
 
+<script>
+  if (window.windowAPI) {
+    document.getElementById('win-minimize').addEventListener('click', () => windowAPI.minimize());
+    document.getElementById('win-maximize').addEventListener('click', () => windowAPI.toggleMaximize());
+    document.getElementById('win-close').addEventListener('click', () => windowAPI.close());
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.tab === tab));
+      document.querySelector('.controls').scrollTop = 0;
+    });
+  });
+</script>
 <script>/*__BUNDLE__*/</script>
 </body>
 </html>
