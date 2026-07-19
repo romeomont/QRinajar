@@ -59,6 +59,10 @@ private struct FlowStepView: View {
     @State private var showUnsavedChangesAlert = false
     @State private var pendingPopPath: [FlowStep]?
 
+    // Custom's fine-tune panels only show once the user has actually opted
+    // into them, so Square/Rounded stay a simple two-choice pick.
+    @State private var showCustomPanels = false
+
     var body: some View {
         VStack(spacing: 0) {
             ProgressView(value: Double(step.rawValue + 1), total: Double(FlowStep.allCases.count))
@@ -86,8 +90,12 @@ private struct FlowStepView: View {
                     case .data:
                         ContentDataForm()
                     case .style:
-                        StylePresetRow()
-                        StyleCustomPanels()
+                        StylePresetRow { kind in
+                            showCustomPanels = (kind == .custom)
+                        }
+                        if showCustomPanels {
+                            StyleCustomPanels()
+                        }
                     case .export:
                         ExportPanel()
                     }
@@ -135,7 +143,10 @@ private struct FlowStepView: View {
             SettingsView()
         }
         .onAppear {
-            if step == .style { styleEntrySnapshot = design.snapshot }
+            if step == .style {
+                styleEntrySnapshot = design.snapshot
+                showCustomPanels = design.activeStyle == .custom
+            }
         }
         .onChange(of: path) { oldPath, newPath in
             // Only care about this step being popped (back button or swipe),

@@ -179,6 +179,10 @@ final class ScannerViewController: UIViewController, AVCaptureMetadataOutputObje
               obj.type == .qr, let payload = obj.stringValue else { return }
         hasScanned = true
         session.stopRunning()
+        // Physical confirmation that a code was actually found, since the
+        // scanner UI doesn't have a chance to show any other feedback
+        // before immediately handing off to Safari.
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
         onFound?(payload)
     }
 }

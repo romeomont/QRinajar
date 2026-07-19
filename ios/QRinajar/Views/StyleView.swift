@@ -5,6 +5,7 @@ import PhotosUI
 // "style" flow step.
 struct StylePresetRow: View {
     @Environment(QRDesign.self) private var design
+    var onSelect: (StylePreset.Kind) -> Void = { _ in }
 
     var body: some View {
         HStack(spacing: 12) {
@@ -15,6 +16,7 @@ struct StylePresetRow: View {
                     case .rounded: design.applyStyle(.rounded)
                     case .custom: break
                     }
+                    onSelect(kind)
                 }
             }
         }
