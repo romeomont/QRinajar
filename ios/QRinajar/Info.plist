@@ -20,6 +20,8 @@
 	<string>0.1.2</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSCameraUsageDescription</key>
+	<string>QRinajar uses your camera to scan a QR code so it can open what it links to.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>QRinajar saves your generated QR code images to your photo library.</string>
 	<key>UILaunchScreen</key>

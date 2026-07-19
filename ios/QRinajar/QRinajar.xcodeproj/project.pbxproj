@@ -17,6 +17,7 @@
 		55C8AF673747889AABFA11DC /* QRinajarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1FCDDDFA8C77514180C8F4 /* QRinajarApp.swift */; };
 		6D6614699F9B713E885A5946 /* SelfTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2641B78CE9FB5B638F4ABBA /* SelfTest.swift */; };
 		7947FF07E4BC0D2DDEC54F15 /* Controls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54E4E494C43A295978733450 /* Controls.swift */; };
+		82FCB440187489B254F0D0F7 /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29F8A2CB3DCB9AAA1ECCF8C7 /* SplashScreenView.swift */; };
 		83CC28FB2E1F893C93CACCD4 /* PreviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F9437CC0FF3CD237599BA6 /* PreviewCard.swift */; };
 		8D314542EDE89C2FAF87F336 /* StyleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B480B08B167329BCB3A278 /* StyleView.swift */; };
 		92D6A4AE6CDB80C6C2EFD5F2 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35BD9572321440DA2C20778 /* ExportView.swift */; };
@@ -28,13 +29,16 @@
 		BC8BF343500D1CA781F3AB23 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 7EC935D742CE18CDCC7EFB30 /* AppIcon.icon */; };
 		BE5904185A5867FA8EE0F59B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FE3ED524B58F430F1248833 /* SettingsView.swift */; };
 		BED583CF31E8218AE37A5AEE /* PresetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1E748DA5D4FD2BEB0B029 /* PresetStore.swift */; };
+		CD5DA7D3FB71A3F3BDE6EDDF /* QRScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122C9035CA5EB4F4EC5F1050 /* QRScanner.swift */; };
 		D09A2C326F42C478B5AD774F /* QRCode in Frameworks */ = {isa = PBXBuildFile; productRef = DFB13FE9E93EF9F37C3DC394 /* QRCode */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		05C4AC0F476EFBDDDB52A23E /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		0BBFAB73043B715FD632819E /* CreateFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlowView.swift; sourceTree = "<group>"; };
+		122C9035CA5EB4F4EC5F1050 /* QRScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRScanner.swift; sourceTree = "<group>"; };
 		15989D6E2997FEA34245C681 /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
+		29F8A2CB3DCB9AAA1ECCF8C7 /* SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreenView.swift; sourceTree = "<group>"; };
 		2C1FCDDDFA8C77514180C8F4 /* QRinajarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRinajarApp.swift; sourceTree = "<group>"; };
 		40394A28D441C9A662CA0879 /* QRinajar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = QRinajar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48F9437CC0FF3CD237599BA6 /* PreviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewCard.swift; sourceTree = "<group>"; };
@@ -95,7 +99,9 @@
 				A35BD9572321440DA2C20778 /* ExportView.swift */,
 				A54DFEA38431E33A90627327 /* LibraryView.swift */,
 				48F9437CC0FF3CD237599BA6 /* PreviewCard.swift */,
+				122C9035CA5EB4F4EC5F1050 /* QRScanner.swift */,
 				7FE3ED524B58F430F1248833 /* SettingsView.swift */,
+				29F8A2CB3DCB9AAA1ECCF8C7 /* SplashScreenView.swift */,
 				A8B480B08B167329BCB3A278 /* StyleView.swift */,
 				05C4AC0F476EFBDDDB52A23E /* WelcomeView.swift */,
 			);
@@ -224,11 +230,13 @@
 				83CC28FB2E1F893C93CACCD4 /* PreviewCard.swift in Sources */,
 				1B075249D070A77E159A4B84 /* QRCardRenderer.swift in Sources */,
 				B5CDE8A8487DAF00F297E5F1 /* QRDesign.swift in Sources */,
+				CD5DA7D3FB71A3F3BDE6EDDF /* QRScanner.swift in Sources */,
 				55C8AF673747889AABFA11DC /* QRinajarApp.swift in Sources */,
 				B6473A7142DAC0163863293A /* RootTabView.swift in Sources */,
 				45252347FCEC6139E66B9B0B /* ScanTester.swift in Sources */,
 				6D6614699F9B713E885A5946 /* SelfTest.swift in Sources */,
 				BE5904185A5867FA8EE0F59B /* SettingsView.swift in Sources */,
+				82FCB440187489B254F0D0F7 /* SplashScreenView.swift in Sources */,
 				8D314542EDE89C2FAF87F336 /* StyleView.swift in Sources */,
 				B8990A8D35064282D557711C /* WelcomeView.swift in Sources */,
 			);

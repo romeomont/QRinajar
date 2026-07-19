@@ -101,6 +101,13 @@ private struct FlowStepView: View {
                 footer
             }
         }
+        .overlay(alignment: .bottomTrailing) {
+            // Reachable from every step, not just Export — scanning is a
+            // separate action from building a code, not tied to one step.
+            ScannerButton()
+                .padding(.trailing, 16)
+                .padding(.bottom, step == .type ? 20 : 88)
+        }
         .navigationTitle(step.title)
         .navigationBarTitleDisplayMode(.inline)
         .background(BackdropGradient())

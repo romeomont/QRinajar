@@ -30,29 +30,45 @@ struct StyleCustomPanels: View {
         @Bindable var design = design
         VStack(spacing: 20) {
             GroupCard {
-                PanelHeader(title: "Shape & layout", systemImage: "square.on.square")
-                Picker("Overall shape", selection: $design.shape) {
-                    Text("Square").tag("square")
-                    Text("Circle").tag("circle")
+                HStack(spacing: 4) {
+                    PanelHeader(title: "Shape & layout", systemImage: "square.on.square")
+                    InfoTip(title: "Shape & layout", text: "The overall geometry of the code: its outer silhouette, export resolution, the blank margin around it, and how rounded the card corners are.")
+                }
+                HStack(spacing: 4) {
+                    Picker("Overall shape", selection: $design.shape) {
+                        Text("Square").tag("square")
+                        Text("Circle").tag("circle")
+                    }
+                    InfoTip(title: "Overall shape", text: "Square is the standard QR silhouette. Circle crops the card to a circle — make sure the modules still have enough quiet zone to scan after cropping.")
                 }
                 IntSlider(title: "Size (px)", value: $design.size, range: 200...2000,
                           tip: "The pixel dimensions of the exported QR image. Bigger sizes stay crisp when printed large; smaller ones are lighter to share.")
                 IntSlider(title: "Quiet-zone margin", value: $design.margin, range: 0...80,
                           tip: "Blank space around the code. Scanners need a clear quiet zone to lock on — too little margin can make the code unreadable, especially when printed close to other content.")
-                IntSlider(title: "Card corner rounding", value: $design.borderRadius, range: 0...60)
+                IntSlider(title: "Card corner rounding", value: $design.borderRadius, range: 0...60,
+                          tip: "Rounds the corners of the card behind the QR code. Purely cosmetic — it doesn't affect the code itself or how well it scans.")
             }
 
             GroupCard {
-                PanelHeader(title: "Module style", systemImage: "circle.grid.3x3.fill")
-                Picker("Dot style", selection: $design.dotStyle) {
-                    Text("Square").tag("square")
-                    Text("Dots").tag("dots")
-                    Text("Rounded").tag("rounded")
-                    Text("Extra rounded").tag("extra-rounded")
-                    Text("Classy").tag("classy")
-                    Text("Classy rounded").tag("classy-rounded")
+                HStack(spacing: 4) {
+                    PanelHeader(title: "Module style", systemImage: "circle.grid.3x3.fill")
+                    InfoTip(title: "Module style", text: "The individual dots that make up the code's data. Softer shapes look friendlier, but very rounded or thin shapes can reduce contrast between dots — test scan after big changes.")
                 }
-                HexColorPicker(title: "Dot color", hex: $design.dotColor)
+                HStack(spacing: 4) {
+                    Picker("Dot style", selection: $design.dotStyle) {
+                        Text("Square").tag("square")
+                        Text("Dots").tag("dots")
+                        Text("Rounded").tag("rounded")
+                        Text("Extra rounded").tag("extra-rounded")
+                        Text("Classy").tag("classy")
+                        Text("Classy rounded").tag("classy-rounded")
+                    }
+                    InfoTip(title: "Dot style", text: "The shape used for each data module. Square is the most scanner-compatible; rounder styles look softer but shrink the dark area slightly, which can hurt scanning at small sizes.")
+                }
+                HStack(spacing: 4) {
+                    HexColorPicker(title: "Dot color", hex: $design.dotColor)
+                    InfoTip(title: "Dot color", text: "The main color of the code. Needs strong contrast against the background to scan reliably — dark colors on a light background work best.")
+                }
                 HStack(spacing: 4) {
                     Toggle("Use gradient for dots", isOn: $design.dotGradient)
                     InfoTip(title: "Dot gradient", text: "Blends two colors across the code instead of one flat color. Looks great, but lower contrast between the two colors can make the code harder to scan — keep them reasonably distinct.")
@@ -73,33 +89,51 @@ struct StyleCustomPanels: View {
                     PanelHeader(title: "Corner eyes", systemImage: "viewfinder")
                     InfoTip(title: "Corner eyes", text: "The three big square markers in the code's corners that scanners use to find and orient it. They can be styled separately from the rest of the dots, but keep them high-contrast — they matter most for reliable scanning.")
                 }
-                Picker("Outer eye style", selection: $design.cornerSquareStyle) {
-                    Text("Match dots").tag("")
-                    Text("Square").tag("square")
-                    Text("Dot").tag("dot")
-                    Text("Rounded").tag("rounded")
-                    Text("Extra rounded").tag("extra-rounded")
-                    Text("Dots").tag("dots")
-                    Text("Classy").tag("classy")
-                    Text("Classy rounded").tag("classy-rounded")
+                HStack(spacing: 4) {
+                    Picker("Outer eye style", selection: $design.cornerSquareStyle) {
+                        Text("Match dots").tag("")
+                        Text("Square").tag("square")
+                        Text("Dot").tag("dot")
+                        Text("Rounded").tag("rounded")
+                        Text("Extra rounded").tag("extra-rounded")
+                        Text("Dots").tag("dots")
+                        Text("Classy").tag("classy")
+                        Text("Classy rounded").tag("classy-rounded")
+                    }
+                    InfoTip(title: "Outer eye style", text: "The shape of the eye's outer ring. \"Match dots\" reuses whatever shape you picked for the module style, for a consistent look.")
                 }
-                Picker("Inner eye style", selection: $design.cornerDotStyle) {
-                    Text("Match dots").tag("")
-                    Text("Square").tag("square")
-                    Text("Dot").tag("dot")
-                    Text("Rounded").tag("rounded")
-                    Text("Extra rounded").tag("extra-rounded")
-                    Text("Dots").tag("dots")
-                    Text("Classy").tag("classy")
-                    Text("Classy rounded").tag("classy-rounded")
+                HStack(spacing: 4) {
+                    Picker("Inner eye style", selection: $design.cornerDotStyle) {
+                        Text("Match dots").tag("")
+                        Text("Square").tag("square")
+                        Text("Dot").tag("dot")
+                        Text("Rounded").tag("rounded")
+                        Text("Extra rounded").tag("extra-rounded")
+                        Text("Dots").tag("dots")
+                        Text("Classy").tag("classy")
+                        Text("Classy rounded").tag("classy-rounded")
+                    }
+                    InfoTip(title: "Inner eye style", text: "The shape of the solid pupil in the center of each eye. Keep it visually distinct from the outer ring so scanners can still tell them apart.")
                 }
-                HexColorPicker(title: "Outer eye color", hex: $design.cornerSquareColor)
-                HexColorPicker(title: "Inner eye color", hex: $design.cornerDotColor)
+                HStack(spacing: 4) {
+                    HexColorPicker(title: "Outer eye color", hex: $design.cornerSquareColor)
+                    InfoTip(title: "Outer eye color", text: "Color of the eye's outer ring. Needs good contrast against the background, just like the dot color.")
+                }
+                HStack(spacing: 4) {
+                    HexColorPicker(title: "Inner eye color", hex: $design.cornerDotColor)
+                    InfoTip(title: "Inner eye color", text: "Color of the eye's center pupil. Can differ from the outer ring for a two-tone accent, as long as it still stands out from the background.")
+                }
             }
 
             GroupCard {
-                PanelHeader(title: "Background", systemImage: "square.fill.on.circle.fill")
-                HexColorPicker(title: "Background color", hex: $design.bgColor)
+                HStack(spacing: 4) {
+                    PanelHeader(title: "Background", systemImage: "square.fill.on.circle.fill")
+                    InfoTip(title: "Background", text: "The area behind the QR modules. Solid colors give the most reliable contrast; transparent backgrounds work best when you know what they'll be placed over.")
+                }
+                HStack(spacing: 4) {
+                    HexColorPicker(title: "Background color", hex: $design.bgColor)
+                    InfoTip(title: "Background color", text: "The fill behind the code. Pick something that stays light relative to the dot color — scanners rely on strong contrast, not on specific colors.")
+                }
                 HStack(spacing: 4) {
                     Toggle("Transparent background", isOn: $design.bgTransparent)
                     InfoTip(title: "Transparent background", text: "Removes the solid background so the QR code sits directly on whatever it's placed over — useful for overlaying on photos or colored materials. Make sure there's still enough contrast against the dots to scan reliably.")
@@ -109,19 +143,30 @@ struct StyleCustomPanels: View {
             LogoPanel()
 
             GroupCard {
-                PanelHeader(title: "Border & caption", systemImage: "textformat")
+                HStack(spacing: 4) {
+                    PanelHeader(title: "Border & caption", systemImage: "textformat")
+                    InfoTip(title: "Border & caption", text: "Optional framing around the card: a text label below the code, and a border/padding around the whole thing. Neither affects the QR data — purely presentation.")
+                }
                 LabeledField("Caption text") {
                     TextField("e.g. Repeater-West — Mast 3", text: $design.caption, axis: .vertical)
                         .lineLimit(1...4)
                 }
-                HexColorPicker(title: "Caption color", hex: $design.captionColor)
-                IntSlider(title: "Caption size", value: $design.captionSize, range: 10...48)
-                Toggle("Show border around card", isOn: $design.borderEnabled)
+                HStack(spacing: 4) {
+                    HexColorPicker(title: "Caption color", hex: $design.captionColor)
+                    InfoTip(title: "Caption color", text: "Text color for the caption below the code. Doesn't affect scanning — it sits outside the QR modules entirely.")
+                }
+                IntSlider(title: "Caption size", value: $design.captionSize, range: 10...48,
+                          tip: "Font size of the caption text. Purely cosmetic — has no effect on the QR code itself.")
+                HStack(spacing: 4) {
+                    Toggle("Show border around card", isOn: $design.borderEnabled)
+                    InfoTip(title: "Border", text: "Draws an outlined edge around the whole card. Purely decorative — toggle it off for a cleaner, borderless look.")
+                }
                 if design.borderEnabled {
                     HexColorPicker(title: "Border color", hex: $design.borderColor)
                     IntSlider(title: "Border width", value: $design.borderWidth, range: 0...20)
                 }
-                IntSlider(title: "Card padding", value: $design.cardPadding, range: 0...60)
+                IntSlider(title: "Card padding", value: $design.cardPadding, range: 0...60,
+                          tip: "Space between the QR code and the edge of the card. More padding gives the code visual breathing room when printed or shared.")
             }
         }
     }
@@ -189,7 +234,10 @@ struct LogoPanel: View {
     var body: some View {
         @Bindable var design = design
         GroupCard {
-            PanelHeader(title: "Center logo", systemImage: "photo")
+            HStack(spacing: 4) {
+                PanelHeader(title: "Center logo", systemImage: "photo")
+                InfoTip(title: "Center logo", text: "Places an image over the middle of the code. QR codes have built-in error correction that lets them keep scanning even with the center obscured — use a higher error correction level (Q or H) when adding one.")
+            }
             HStack(spacing: 12) {
                 if let data = design.logoPNG, let ui = UIImage(data: data) {
                     Image(uiImage: ui).resizable().scaledToFit()

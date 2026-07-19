@@ -28,6 +28,7 @@ targets:
         CFBundleVersion: "1"
         UILaunchScreen: {}
         NSPhotoLibraryAddUsageDescription: "QRinajar saves your generated QR code images to your photo library."
+        NSCameraUsageDescription: "QRinajar uses your camera to scan a QR code so it can open what it links to."
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft
