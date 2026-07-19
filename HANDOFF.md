@@ -11,11 +11,6 @@ history if you want the blow-by-blow.
   truth for the Xcode project; regenerate with `xcodegen generate` after
   adding/removing/renaming any Swift file (see AGENTS.md for the full
   command).
-- `plan.md` — the **original** implementation plan. It describes a
-  tab-bar architecture that has since been replaced by a guided
-  step-by-step flow (see below). Treat it as historical context for *why*
-  files are named/shaped the way they are, not as a description of the
-  current UI.
 - `README.md` — has a full "iOS app" section kept in sync with what's
   actually shipped; check there first for a feature-level summary before
   reading code.
