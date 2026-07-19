@@ -1,6 +1,6 @@
 {
   "name": "qr-code-generator",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Offline QR code generator, packaged as a Windows desktop app.",
   "main": "electron/main.js",
   "scripts": {

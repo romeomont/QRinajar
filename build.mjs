@@ -12,10 +12,13 @@ const result = await build({
 
 const js = result.outputFiles[0].text;
 const html = readFileSync("src/index.html", "utf8");
+const { version } = JSON.parse(readFileSync("package.json", "utf8"));
 
 // Inline the bundle; escape any </script> sequences inside the JS.
 const safeJs = js.replace(/<\/script/gi, "<\\/script");
-const out = html.replace("/*__BUNDLE__*/", () => safeJs);
+const out = html
+  .replace("/*__BUNDLE__*/", () => safeJs)
+  .replace("__VERSION__", version);
 
 mkdirSync("dist", { recursive: true });
 writeFileSync("dist/qr-code-generator.html", out);
