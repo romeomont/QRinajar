@@ -90,9 +90,15 @@ On cold launch: `SplashScreenView` (~2.4s, skipped when
 
 ## App Store distribution status
 
-An iOS build has been uploaded to App Store Connect (version 1.0, build 1)
-and is going through metadata setup for first submission. Relevant project
-config for this:
+**Submitted for review** as of 2026-07-19 (iOS version 1.0, build 1,
+Universal Purchase covering iOS + macOS via Mac Catalyst). If it comes
+back approved, there's nothing left to do here. If it's rejected, Apple's
+rejection message in App Store Connect → Resolution Center will say why —
+common first-submission issues are metadata mismatches or screenshot
+inaccuracies, neither of which should apply since everything was filled
+in carefully, but read the actual rejection reason before assuming.
+
+Relevant project config for this submission:
 
 - `DEVELOPMENT_TEAM` is set in `project.yml` (a Developer Program Team ID —
   not personal info, just an account identifier; required for
@@ -123,9 +129,14 @@ config for this:
   `sips -z 2688 1242` to hit it), 13" iPad needs `2064×2752` (matches iPad
   Pro 13-inch natively).
 
-Not yet done as of this handoff: App Review contact information and final
-"Add for Review" submission — both require account-holder details that
-aren't something to script or record here.
+Screenshots themselves were never committed to the repo — generated into
+`/tmp/appstore_screenshots/`, uploaded directly to App Store Connect, and
+left out of git deliberately since they're one-off marketing assets, not
+project source.
+
+App Review contact information (account holder's name/phone/email) was
+filled in directly in App Store Connect — intentionally not recorded here
+or anywhere in the repo.
 
 ## Verification commands
 
