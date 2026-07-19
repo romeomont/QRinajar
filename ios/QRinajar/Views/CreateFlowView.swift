@@ -113,11 +113,8 @@ private struct FlowStepView: View {
 
     private var footer: some View {
         HStack(spacing: 12) {
-            Button("Back") {
-                path.removeLast()
-            }
-            .modifier(GlassButtonStyle())
-
+            // No Back button here — the nav bar's own back chevron (from the
+            // real NavigationStack push) already covers that.
             if step == .export {
                 Button {
                     saveName = defaultName()
