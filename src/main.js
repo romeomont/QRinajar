@@ -56,6 +56,18 @@ const PRESET_DATA = {
 
 const STORE_KEY = "qrinajar-settings-v1";
 
+const STYLE_SQUARE = { dotStyle: "square", cornerSquareStyle: "square", cornerDotStyle: "square", borderRadius: 0 };
+const STYLE_ROUNDED = { dotStyle: "rounded", cornerSquareStyle: "extra-rounded", cornerDotStyle: "dot", borderRadius: 14 };
+
+function styleMatches(s, preset) {
+  return (
+    s.dotStyle === preset.dotStyle &&
+    s.cornerSquareStyle === preset.cornerSquareStyle &&
+    s.cornerDotStyle === preset.cornerDotStyle &&
+    s.borderRadius === preset.borderRadius
+  );
+}
+
 function readUI() {
   return {
     data: $("data").value,
@@ -252,6 +264,36 @@ document.querySelectorAll(".chip[data-preset]").forEach((chip) => {
     render();
   });
 });
+
+// ---- style presets (square / rounded / custom) ----
+function setActiveStyle(name) {
+  document.querySelectorAll(".style-card").forEach((c) => c.classList.toggle("active", c.dataset.style === name));
+  const showCustom = name === "custom";
+  $("custom-subtabs").style.display = showCustom ? "" : "none";
+  $("custom-panels").style.display = showCustom ? "" : "none";
+}
+
+function applyStylePreset(preset, name) {
+  applyToUI({ ...readUI(), ...preset });
+  render();
+  setActiveStyle(name);
+}
+
+$("style-square").addEventListener("click", () => applyStylePreset(STYLE_SQUARE, "square"));
+$("style-rounded").addEventListener("click", () => applyStylePreset(STYLE_ROUNDED, "rounded"));
+$("style-custom").addEventListener("click", () => setActiveStyle("custom"));
+
+document.querySelectorAll(".subtab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.subtab;
+    document.querySelectorAll(".subtab-btn").forEach((b) => b.classList.toggle("active", b === btn));
+    document.querySelectorAll(".subtab-panel").forEach((p) => p.classList.toggle("active", p.dataset.subtab === tab));
+  });
+});
+
+// manually tweaking a detail panel counts as going custom
+$("custom-panels").addEventListener("input", () => setActiveStyle("custom"));
+$("custom-panels").addEventListener("change", () => setActiveStyle("custom"));
 
 // ---- logo handling (all local via FileReader) ----
 const drop = $("logo-drop");
@@ -536,4 +578,9 @@ $("reset-preset").addEventListener("click", () => {
   if (saved) applyToUI({ ...FACTORY, ...saved });
   else refreshDynamicLabels();
   render();
+
+  const s = readUI();
+  if (styleMatches(s, STYLE_SQUARE)) setActiveStyle("square");
+  else if (styleMatches(s, STYLE_ROUNDED)) setActiveStyle("rounded");
+  else setActiveStyle("custom");
 })();

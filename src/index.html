@@ -160,6 +160,52 @@
   }
   .section .body { padding: 14px; }
 
+  .style-choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .style-card {
+    cursor: pointer;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    padding: 14px 10px;
+    text-align: center;
+    transition: border-color .15s, background .15s;
+  }
+  .style-card:hover { border-color: var(--accent); }
+  .style-card.active { border-color: var(--accent); background: rgba(53,181,229,.12); }
+  .style-card .swatch {
+    width: 40px; height: 40px; margin: 0 auto 10px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
+  }
+  .style-card .swatch span { background: var(--accent); }
+  .style-card.square-preview .swatch span { border-radius: 1px; }
+  .style-card.rounded-preview .swatch span { border-radius: 50%; }
+  .style-card.custom-preview .swatch { display: grid; place-items: center; }
+  .style-card.custom-preview .swatch svg { width: 26px; height: 26px; stroke: var(--accent); }
+  .style-card .name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .style-card .desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .subtabs {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin: 18px 0 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .subtab-btn {
+    cursor: pointer;
+    padding: 5px 10px;
+    font-size: 11.5px; font-weight: 600;
+    letter-spacing: .3px;
+    color: var(--muted);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    user-select: none;
+  }
+  .subtab-btn:hover { color: var(--text); border-color: var(--accent); }
+  .subtab-btn.active { color: #06202e; background: var(--accent); border-color: var(--accent); }
+  .subtab-panel { display: none; }
+  .subtab-panel.active { display: block; }
+
   label.field { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
   textarea, select, input[type=text], input[type=number] {
     width: 100%;
@@ -248,13 +294,8 @@
   <div class="controls">
 
     <div class="tabs">
-      <div class="tab-btn active" data-tab="content">Content</div>
-      <div class="tab-btn" data-tab="shape">Shape &amp; layout</div>
-      <div class="tab-btn" data-tab="module">Module style</div>
-      <div class="tab-btn" data-tab="eyes">Corner eyes</div>
-      <div class="tab-btn" data-tab="bg">Background</div>
-      <div class="tab-btn" data-tab="logo">Center logo</div>
-      <div class="tab-btn" data-tab="border">Border &amp; caption</div>
+      <div class="tab-btn active" data-tab="content">Where do you want this to go?</div>
+      <div class="tab-btn" data-tab="look">What do you want it to look like?</div>
       <div class="tab-btn" data-tab="presets">Presets</div>
     </div>
 
@@ -280,8 +321,38 @@
       </div>
     </div>
 
-    <div class="section tab-panel" data-tab="shape">
+    <div class="section tab-panel" data-tab="look">
       <div class="body">
+        <div class="style-choices">
+          <div class="style-card square-preview" id="style-square" data-style="square">
+            <div class="swatch"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="name">Default square</div>
+            <div class="desc">Crisp, classic modules</div>
+          </div>
+          <div class="style-card rounded-preview" id="style-rounded" data-style="rounded">
+            <div class="swatch"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="name">Default rounded</div>
+            <div class="desc">Soft, friendly modules</div>
+          </div>
+          <div class="style-card custom-preview" id="style-custom" data-style="custom">
+            <div class="swatch"><svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="6" r="2" fill="currentColor" stroke="none"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><circle cx="10" cy="18" r="2" fill="currentColor" stroke="none"/></svg></div>
+            <div class="name">Custom</div>
+            <div class="desc">Fine-tune every detail</div>
+          </div>
+        </div>
+
+        <div class="subtabs" id="custom-subtabs" style="display:none">
+          <div class="subtab-btn active" data-subtab="shape">Shape &amp; layout</div>
+          <div class="subtab-btn" data-subtab="module">Module style</div>
+          <div class="subtab-btn" data-subtab="eyes">Corner eyes</div>
+          <div class="subtab-btn" data-subtab="bg">Background</div>
+          <div class="subtab-btn" data-subtab="logo">Center logo</div>
+          <div class="subtab-btn" data-subtab="border">Border &amp; caption</div>
+        </div>
+
+    <div id="custom-panels" style="display:none">
+
+    <div class="subtab-panel active" data-subtab="shape">
         <div class="grid2">
           <div>
             <label class="field" for="shape">Overall shape</label>
@@ -297,11 +368,9 @@
         </div>
         <label class="field" for="margin">Quiet-zone margin <span class="val" id="margin-val">16</span></label>
         <input type="range" id="margin" min="0" max="80" value="16">
-      </div>
     </div>
 
-    <div class="section tab-panel" data-tab="module">
-      <div class="body">
+    <div class="subtab-panel" data-subtab="module">
         <label class="field" for="dot-style">Dot style</label>
         <select id="dot-style">
           <option value="square">Square (classic)</option>
@@ -339,11 +408,9 @@
           <label class="field">Rotation <span class="val" id="rot-val">45°</span></label>
           <input type="range" id="gradient-rot" min="0" max="360" value="45">
         </div>
-      </div>
     </div>
 
-    <div class="section tab-panel" data-tab="eyes">
-      <div class="body">
+    <div class="subtab-panel" data-subtab="eyes">
         <div class="grid2">
           <div>
             <label class="field" for="corner-square-style">Outer eye style</label>
@@ -382,11 +449,9 @@
             <input type="color" id="corner-dot-color" value="#35b5e5">
           </div>
         </div>
-      </div>
     </div>
 
-    <div class="section tab-panel" data-tab="bg">
-      <div class="body">
+    <div class="subtab-panel" data-subtab="bg">
         <div class="row">
           <div>
             <label class="field">Background color</label>
@@ -397,11 +462,9 @@
           </div>
         </div>
         <label class="inline-check"><input type="checkbox" id="bg-transparent"> Transparent background</label>
-      </div>
     </div>
 
-    <div class="section tab-panel" data-tab="logo">
-      <div class="body">
+    <div class="subtab-panel" data-subtab="logo">
         <div class="drop" id="logo-drop">
           <img id="logo-thumb" style="display:none" alt="">
           <span id="logo-drop-text">Click or drop an image here (PNG/SVG/JPG)<br>stays on this device - never uploaded</span>
@@ -415,11 +478,9 @@
           <label class="inline-check"><input type="checkbox" id="hide-dots" checked> Clear dots behind logo</label>
           <button class="btn ghost" id="logo-remove" style="margin-top:10px;width:100%">Remove logo</button>
         </div>
-      </div>
     </div>
 
-    <div class="section tab-panel" data-tab="border">
-      <div class="body">
+    <div class="subtab-panel" data-subtab="border">
         <label class="field" for="caption">Caption text (shown under the QR code)</label>
         <textarea id="caption" spellcheck="false" style="min-height:48px" placeholder="e.g. Repeater-West - Mast 3"></textarea>
         <div class="grid2" style="margin-top:6px">
@@ -451,6 +512,10 @@
         <label class="field" for="card-padding">Card padding <span class="val" id="card-padding-val">24</span></label>
         <input type="range" id="card-padding" min="0" max="60" value="24">
         <div class="hint">Border and caption are baked into every download (PNG/JPEG/SVG) and the clipboard copy, not just the preview.</div>
+    </div>
+
+    </div>
+
       </div>
     </div>
 
