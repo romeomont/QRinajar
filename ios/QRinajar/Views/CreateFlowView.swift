@@ -93,6 +93,9 @@ private struct FlowStepView: View {
                     }
                 }
                 .padding()
+                // Extra clearance so the floating scanner button never sits
+                // permanently over the last card once scrolled to the bottom.
+                .padding(.bottom, 60)
             }
 
             // Step 1 auto-advances on selection, so there's nothing for a
