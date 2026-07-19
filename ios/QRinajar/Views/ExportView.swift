@@ -17,11 +17,13 @@ struct ExportPanel: View {
                         saveToPhotos()
                     } label: { exportLabel("Save to Photos", "square.and.arrow.down") }
                     .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.roundedRectangle(radius: 18))
 
                     Button {
                         copyImage()
                     } label: { exportLabel("Copy", "doc.on.doc") }
                     .buttonStyle(.bordered)
+                    .buttonBorderShape(.roundedRectangle(radius: 18))
                 }
 
                 if let saveMessage {
