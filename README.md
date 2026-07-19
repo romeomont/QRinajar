@@ -15,13 +15,15 @@ gradients, corner eyes, center logo, caption + border) and content presets
 for common use cases (website, plain text, Wi-Fi, vCard contact, social
 profile).
 
-Available two ways:
+Available three ways:
 
 - **Windows app** - installer or portable exe, no browser needed.
 - **Single HTML file** - `dist/qrinajar.html`, zero dependencies at
   runtime. Copy it to a laptop, phone, or USB stick and open it in any
   browser. No internet is ever used: the QR library (qr-code-styling), the
   scan-test decoder (jsQR), and all UI are inlined into the file.
+- **iOS app** - native SwiftUI app for iPhone/iPad, see [iOS app](#ios-app)
+  below.
 
 ## Windows app
 
@@ -52,6 +54,53 @@ To build these yourself (requires Windows Developer Mode enabled - see
 npm install
 npm run dist:win     # -> release/QRinajarInstaller.exe (installer)
                       #    release/QRinajarPortable.exe (portable)
+```
+
+## iOS app
+
+Native SwiftUI port in `ios/QRinajar/`, targeting iOS 18+ and following
+iOS 26 Liquid Glass design conventions. Uses the
+[dagronf/QRCode](https://github.com/dagronf/QRCode) Swift package for
+rendering.
+
+The whole app is one guided flow instead of a tab bar: pick what you're
+sharing → enter the details → style it → save/export, each step with a
+pinned live preview, progress bar, and (i) info tips explaining what every
+style control does and how it affects scannability. Back-navigation is a
+real `NavigationStack` push per step, so swiping from the left edge pops
+back like any other iOS screen — and backing out of the Style step with
+unsaved changes prompts to save or discard first.
+
+Other things worth knowing:
+
+- **Library** - saved presets (reachable from any step via the toolbar),
+  with swipe-to-delete and an Edit button, plus "Save current design" and
+  "Reset to factory".
+- **Scan self-test** - same idea as the web app's jsQR check, but using
+  Vision's `VNDetectBarcodesRequest` to decode the rendered code offline.
+- **QR scanner** - a floating button on every step opens the camera to scan
+  a QR code and open it in Safari; first use explains why the camera
+  permission is needed before the system prompt appears.
+- **Appearance** - Settings (gear icon) lets you force light/dark or follow
+  the system; also asked on first launch after a short splash screen.
+- **App icon** - a hand-authored Icon Composer `.icon` bundle
+  (`ios/QRinajar/AppIcon.icon/`) rather than a flat PNG, so it renders with
+  real specular/translucency on iOS 26 instead of a static image.
+
+Requires Xcode with the iOS 18+ SDK and [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+(`brew install xcodegen`) to generate the `.xcodeproj` from `project.yml`:
+
+```
+cd ios/QRinajar
+xcodegen generate
+open QRinajar.xcodeproj
+```
+
+Or build headless for the Simulator:
+
+```
+xcodebuild -project ios/QRinajar/QRinajar.xcodeproj -scheme QRinajar \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 ```
 
 ## Features

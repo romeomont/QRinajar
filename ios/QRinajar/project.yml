@@ -1,0 +1,51 @@
+name: QRinajar
+options:
+  bundleIdPrefix: com.qrinajar
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+packages:
+  QRCode:
+    url: https://github.com/dagronf/QRCode
+    from: "28.0.0"
+targets:
+  QRinajar:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: App
+      - path: Model
+      - path: Rendering
+      - path: Views
+      - path: Assets.xcassets
+      - path: AppIcon.icon
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: QRinajar
+        CFBundleShortVersionString: "0.1.2"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        NSPhotoLibraryAddUsageDescription: "QRinajar saves your generated QR code images to your photo library."
+        NSCameraUsageDescription: "QRinajar uses your camera to scan a QR code so it can open what it links to."
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.qrinajar.app
+        MARKETING_VERSION: "0.1.2"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    dependencies:
+      - package: QRCode
+        product: QRCode
