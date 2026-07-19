@@ -14,20 +14,17 @@ struct WelcomeView: View {
                 .foregroundStyle(brandBlue)
 
             VStack(spacing: 6) {
-                Text("You've gotten a win here.")
+                Text("How do you want to see this?")
                     .font(.title2.weight(.bold))
                     .multilineTextAlignment(.center)
-                Text("QRinajar can make a QR code for you!")
-                    .font(.title3)
+                Text("You've gotten a win here — QRinajar can make a QR code for you! Pick a look to get started.")
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
             .padding(.horizontal)
 
             VStack(alignment: .leading, spacing: 10) {
-                Text("Which look do you prefer?")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
                 ForEach(AppColorScheme.allCases) { s in
                     Button {
                         appearance = s
@@ -63,7 +60,7 @@ struct WelcomeView: View {
             Button {
                 isPresented = false
             } label: {
-                Text("Get Started").frame(maxWidth: .infinity)
+                Text("Continue").frame(maxWidth: .infinity)
             }
             .modifier(GlassProminentButtonStyle())
             .padding(.horizontal)
