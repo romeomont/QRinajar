@@ -237,7 +237,7 @@ struct ContentTypePicker: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("QR codes can be used for lots of things. Is what you're making one of these?")
+            Text("QR codes are everywhere, here are some common ones! If you need something custom hit that custom button.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
