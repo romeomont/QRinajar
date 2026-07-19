@@ -1,6 +1,6 @@
 {
   "name": "qrinajar",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Offline QR code generator, packaged as a Windows desktop app.",
   "main": "electron/main.js",
   "scripts": {
