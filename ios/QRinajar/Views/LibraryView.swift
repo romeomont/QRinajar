@@ -7,6 +7,8 @@ struct LibraryView: View {
     @State private var showSave = false
     @State private var newName = ""
     @State private var showResetConfirm = false
+    @State private var pendingDelete: SavedPreset?
+    @State private var showDeleteConfirm = false
 
     var body: some View {
         NavigationStack {
@@ -15,7 +17,7 @@ struct LibraryView: View {
                     ContentUnavailableView("No saved presets", systemImage: "tray",
                         description: Text("Save your current design to reuse it later."))
                 } else {
-                    Section("Saved presets") {
+                    Section {
                         ForEach(store.presets) { preset in
                             Button {
                                 design.apply(preset.design)
@@ -28,6 +30,15 @@ struct LibraryView: View {
                                             .font(.caption).foregroundStyle(.secondary)
                                     }
                                     Spacer()
+                                    Button {
+                                        requestDelete(preset)
+                                    } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .font(.title3)
+                                            .foregroundStyle(.red)
+                                    }
+                                    .buttonStyle(.plain)
+
                                     Image(systemName: "chevron.right")
                                         .font(.caption.weight(.semibold))
                                         .foregroundStyle(.tertiary)
@@ -35,8 +46,18 @@ struct LibraryView: View {
                                 .contentShape(Rectangle())
                             }
                             .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    requestDelete(preset)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                         }
-                        .onDelete { store.delete(at: $0) }
+                    } header: {
+                        Text("Saved presets")
+                    } footer: {
+                        Text("Swipe left on a preset, or tap the red ×, to delete it.")
                     }
                 }
 
@@ -61,7 +82,6 @@ struct LibraryView: View {
                     }
                     .modifier(GlassButtonStyle())
                 }
-                ToolbarItem(placement: .topBarTrailing) { EditButton() }
             }
             .alert("Save preset", isPresented: $showSave) {
                 TextField("Name", text: $newName)
@@ -77,7 +97,18 @@ struct LibraryView: View {
             } message: {
                 Text("This restores every setting to the original defaults.")
             }
+            .alert("Delete preset?", isPresented: $showDeleteConfirm, presenting: pendingDelete) { preset in
+                Button("Delete", role: .destructive) { store.delete(preset) }
+                Button("Cancel", role: .cancel) {}
+            } message: { preset in
+                Text("\"\(preset.name)\" will be permanently deleted. This can't be undone.")
+            }
         }
+    }
+
+    private func requestDelete(_ preset: SavedPreset) {
+        pendingDelete = preset
+        showDeleteConfirm = true
     }
 
     private func defaultName() -> String {
