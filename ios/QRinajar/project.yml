@@ -33,6 +33,7 @@ targets:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
+        UIRequiresFullScreen: true
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.qrinajar.app
