@@ -53,6 +53,12 @@ private struct FlowStepView: View {
     @State private var showSaveAlert = false
     @State private var saveName = ""
 
+    // Guards against losing style edits: captured when this step appears,
+    // compared against the live design when the user backs out.
+    @State private var styleEntrySnapshot: DesignSnapshot?
+    @State private var showUnsavedChangesAlert = false
+    @State private var pendingPopPath: [FlowStep]?
+
     var body: some View {
         VStack(spacing: 0) {
             ProgressView(value: Double(step.rawValue + 1), total: Double(FlowStep.allCases.count))
@@ -118,6 +124,36 @@ private struct FlowStepView: View {
         .sheet(isPresented: $showSettings) {
             SettingsView()
         }
+        .onAppear {
+            if step == .style { styleEntrySnapshot = design.snapshot }
+        }
+        .onChange(of: path) { oldPath, newPath in
+            // Only care about this step being popped (back button or swipe),
+            // not about it being pushed onto or navigated forward from.
+            guard step == .style, newPath.count < oldPath.count, oldPath.last == step else { return }
+            guard let entry = styleEntrySnapshot, design.snapshot != entry else { return }
+            // Cancel the pop so we can ask first; re-applied below if the
+            // user chooses to leave anyway.
+            pendingPopPath = newPath
+            path = oldPath
+            showUnsavedChangesAlert = true
+        }
+        .alert("Unsaved style changes", isPresented: $showUnsavedChangesAlert) {
+            Button("Save to Library") {
+                saveName = defaultName()
+                showSaveAlert = true
+            }
+            Button("Discard Changes", role: .destructive) {
+                if let entry = styleEntrySnapshot { design.apply(entry) }
+                if let target = pendingPopPath { path = target }
+                pendingPopPath = nil
+            }
+            Button("Keep Editing", role: .cancel) {
+                pendingPopPath = nil
+            }
+        } message: {
+            Text("You changed the style but haven't saved it. Save this design to your library, or discard the changes?")
+        }
     }
 
     private var footer: some View {
@@ -149,8 +185,14 @@ private struct FlowStepView: View {
             Button("Save") {
                 let name = saveName.trimmingCharacters(in: .whitespaces)
                 store.save(name: name.isEmpty ? defaultName() : name, design: design.snapshot)
+                if let target = pendingPopPath {
+                    path = target
+                    pendingPopPath = nil
+                }
             }
-            Button("Cancel", role: .cancel) {}
+            Button("Cancel", role: .cancel) {
+                pendingPopPath = nil
+            }
         }
     }
 
