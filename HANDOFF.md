@@ -88,6 +88,45 @@ On cold launch: `SplashScreenView` (~2.4s, skipped when
   handoff (still generated locally by `capture_screenshots.sh` for manual
   review, just not committed).
 
+## App Store distribution status
+
+An iOS build has been uploaded to App Store Connect (version 1.0, build 1)
+and is going through metadata setup for first submission. Relevant project
+config for this:
+
+- `DEVELOPMENT_TEAM` is set in `project.yml` (a Developer Program Team ID —
+  not personal info, just an account identifier; required for
+  `CODE_SIGN_STYLE: Automatic` to resolve a signing identity/provisioning
+  profile). Whoever continues this needs Xcode signed into an Apple ID
+  that's a member of that team (Xcode → Settings → Accounts) before
+  archiving will work.
+- `SUPPORTS_MACCATALYST: YES` + `DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER: NO`
+  means the same binary ships on macOS too, under the same bundle ID —
+  set up as a single Universal Purchase (one App Store Connect app record,
+  both iOS and macOS platforms checked) rather than two separate listings.
+- `UIRequiresFullScreen: true` — the app doesn't support iPad Split View;
+  this was required by App Store validation since `TARGETED_DEVICE_FAMILY`
+  includes iPad but the app only supports 3 of 4 orientations.
+- `LSApplicationCategoryType: public.app-category.utilities` — required
+  for the Mac Catalyst build; App Store Connect otherwise rejects it.
+- `PRIVACY.md` at repo root is the app's privacy policy (required by App
+  Store Connect before submission) — accurate, since the app collects
+  nothing. Its GitHub URL (`.../blob/master/PRIVACY.md`) is what's entered
+  as the Privacy Policy URL in App Privacy.
+- The app icon shown on the App Store listing is auto-extracted from the
+  uploaded build's `AppIcon.icon` asset — no separate manual upload exists
+  in current App Store Connect, despite older guidance suggesting one.
+- Marketing screenshots were captured from Simulator at exact required
+  pixel sizes: iPhone 6.9" needs `1320×2868` (matches iPhone 17 Pro Max
+  natively), iPhone 6.5" needs exactly `1242×2688` (no current Simulator
+  device is that size — the 1320×2868 captures were downscaled with
+  `sips -z 2688 1242` to hit it), 13" iPad needs `2064×2752` (matches iPad
+  Pro 13-inch natively).
+
+Not yet done as of this handoff: App Review contact information and final
+"Add for Review" submission — both require account-holder details that
+aren't something to script or record here.
+
 ## Verification commands
 
 ```
