@@ -236,6 +236,14 @@ enum QRCardRenderer {
         composeImage(s, opaque: opaque)?.cgImage
     }
 
+    // Bare QR modules only — no card border/padding/caption. Used for the
+    // Create tab's live preview, where the surrounding PreviewCard material
+    // already provides the visual frame.
+    static func qrOnlyImage(_ s: DesignSnapshot) -> UIImage? {
+        guard let doc = makeDocument(s), let cg = try? doc.cgImage(dimension: s.size) else { return nil }
+        return UIImage(cgImage: cg)
+    }
+
     static func pngData(_ s: DesignSnapshot) -> Data? {
         composeImage(s, opaque: false)?.pngData()
     }

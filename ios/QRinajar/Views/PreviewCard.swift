@@ -4,17 +4,20 @@ import SwiftUI
 struct PreviewCard: View {
     @Environment(QRDesign.self) private var design
     var maxHeight: CGFloat = 320
+    // When true, renders just the QR modules (no card border/padding/caption) —
+    // used on the Create tab, where this card's own material is the frame.
+    var bare: Bool = false
 
     private var image: UIImage? {
         var snap = design.snapshot
         // Render preview at a modest resolution for responsiveness.
         snap.size = min(snap.size, 560)
-        return QRCardRenderer.composeImage(snap, opaque: false)
+        return bare ? QRCardRenderer.qrOnlyImage(snap) : QRCardRenderer.composeImage(snap, opaque: false)
     }
 
     var body: some View {
         ZStack {
-            if design.bgTransparent {
+            if !bare && design.bgTransparent {
                 Checkerboard()
                     .clipShape(RoundedRectangle(cornerRadius: 16))
             }
@@ -23,6 +26,11 @@ struct PreviewCard: View {
                     .resizable()
                     .scaledToFit()
                     .frame(maxHeight: maxHeight)
+                    .padding(bare ? 12 : 0)
+                    // A scanned QR always needs a light backing regardless of the
+                    // app's own light/dark theme, so give the bare preview its own
+                    // fixed-white card rather than relying on the surrounding material.
+                    .background(bare ? RoundedRectangle(cornerRadius: 16).fill(.white) : nil)
                     .accessibilityLabel("QR code preview")
             } else {
                 ContentUnavailableView("Nothing to render", systemImage: "qrcode")

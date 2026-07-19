@@ -9,7 +9,7 @@ struct CreateView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    PreviewCard()
+                    PreviewCard(bare: true)
 
                     // Content type selector
                     Picker("Content type", selection: $design.contentType) {
@@ -21,23 +21,30 @@ struct CreateView: View {
 
                     contentForm(design)
 
-                    Button {
-                        showECC = true
-                    } label: {
-                        HStack {
-                            Label("Error correction", systemImage: "checkmark.shield")
-                            Spacer()
-                            Text(design.ecc).foregroundStyle(.secondary)
-                            Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                    HStack {
+                        Button {
+                            showECC = true
+                        } label: {
+                            HStack {
+                                Label("Error correction", systemImage: "checkmark.shield")
+                                Spacer()
+                                Text(design.ecc).foregroundStyle(.secondary)
+                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                            }
                         }
+                        .buttonStyle(.plain)
+                        InfoTip(
+                            title: "Error correction",
+                            text: "How much of the code can be damaged, dirty, or covered by a logo and still scan. Higher levels survive more damage but pack the code with denser modules. M is a good default; use Q or H if you're adding a center logo."
+                        )
                     }
-                    .buttonStyle(.plain)
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
                 }
                 .padding()
             }
             .navigationTitle("Create")
+            .navigationBarTitleDisplayMode(.inline)
             .background(BackdropGradient())
             .sheet(isPresented: $showECC) {
                 ECCSheet(ecc: $design.ecc)

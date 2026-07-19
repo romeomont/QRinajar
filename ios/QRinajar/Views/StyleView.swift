@@ -7,28 +7,34 @@ struct StyleView: View {
     var body: some View {
         @Bindable var design = design
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    PreviewCard()
+            VStack(spacing: 0) {
+                // Pinned above the scroll area so the live preview stays visible
+                // while fine-tuning sliders below.
+                PreviewCard(maxHeight: 200)
+                    .padding(.horizontal)
+                    .padding(.top, 8)
 
-                    // Style preset cards
-                    HStack(spacing: 12) {
-                        ForEach(StylePreset.Kind.allCases) { kind in
-                            StylePresetCard(kind: kind, active: design.activeStyle == kind) {
-                                switch kind {
-                                case .square: design.applyStyle(.square)
-                                case .rounded: design.applyStyle(.rounded)
-                                case .custom: break
+                ScrollView {
+                    VStack(spacing: 20) {
+                        // Style preset cards
+                        HStack(spacing: 12) {
+                            ForEach(StylePreset.Kind.allCases) { kind in
+                                StylePresetCard(kind: kind, active: design.activeStyle == kind) {
+                                    switch kind {
+                                    case .square: design.applyStyle(.square)
+                                    case .rounded: design.applyStyle(.rounded)
+                                    case .custom: break
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    if design.activeStyle == .custom || true {
-                        customPanels(design)
+                        if design.activeStyle == .custom || true {
+                            customPanels(design)
+                        }
                     }
+                    .padding()
                 }
-                .padding()
             }
             .navigationTitle("Style")
             .background(BackdropGradient())
@@ -46,8 +52,10 @@ struct StyleView: View {
                 Text("Square").tag("square")
                 Text("Circle").tag("circle")
             }
-            IntSlider(title: "Size (px)", value: $design.size, range: 200...2000)
-            IntSlider(title: "Quiet-zone margin", value: $design.margin, range: 0...80)
+            IntSlider(title: "Size (px)", value: $design.size, range: 200...2000,
+                      tip: "The pixel dimensions of the exported QR image. Bigger sizes stay crisp when printed large; smaller ones are lighter to share.")
+            IntSlider(title: "Quiet-zone margin", value: $design.margin, range: 0...80,
+                      tip: "Blank space around the code. Scanners need a clear quiet zone to lock on — too little margin can make the code unreadable, especially when printed close to other content.")
             IntSlider(title: "Card corner rounding", value: $design.borderRadius, range: 0...60)
         }
 
@@ -63,7 +71,10 @@ struct StyleView: View {
                 Text("Classy rounded").tag("classy-rounded")
             }
             HexColorPicker(title: "Dot color", hex: $design.dotColor)
-            Toggle("Use gradient for dots", isOn: $design.dotGradient)
+            HStack(spacing: 4) {
+                Toggle("Use gradient for dots", isOn: $design.dotGradient)
+                InfoTip(title: "Dot gradient", text: "Blends two colors across the code instead of one flat color. Looks great, but lower contrast between the two colors can make the code harder to scan — keep them reasonably distinct.")
+            }
             if design.dotGradient {
                 HexColorPicker(title: "Gradient color 2", hex: $design.dotColor2)
                 Picker("Gradient type", selection: $design.gradientType) {
@@ -77,7 +88,10 @@ struct StyleView: View {
 
         // Corner eyes
         GroupCard {
-            PanelHeader(title: "Corner eyes", systemImage: "viewfinder")
+            HStack(spacing: 4) {
+                PanelHeader(title: "Corner eyes", systemImage: "viewfinder")
+                InfoTip(title: "Corner eyes", text: "The three big square markers in the code's corners that scanners use to find and orient it. They can be styled separately from the rest of the dots, but keep them high-contrast — they matter most for reliable scanning.")
+            }
             Picker("Outer eye style", selection: $design.cornerSquareStyle) {
                 Text("Match dots").tag("")
                 Text("Square").tag("square")
@@ -106,7 +120,10 @@ struct StyleView: View {
         GroupCard {
             PanelHeader(title: "Background", systemImage: "square.fill.on.circle.fill")
             HexColorPicker(title: "Background color", hex: $design.bgColor)
-            Toggle("Transparent background", isOn: $design.bgTransparent)
+            HStack(spacing: 4) {
+                Toggle("Transparent background", isOn: $design.bgTransparent)
+                InfoTip(title: "Transparent background", text: "Removes the solid background so the QR code sits directly on whatever it's placed over — useful for overlaying on photos or colored materials. Make sure there's still enough contrast against the dots to scan reliably.")
+            }
         }
 
         // Logo
@@ -215,9 +232,13 @@ struct LogoPanel: View {
 
             if design.logoPNG != nil {
                 LabeledSlider(title: "Logo size", value: $design.logoSize, range: 0.1...0.5, step: 0.05,
-                              format: { String(format: "%.2f", $0) })
+                              format: { String(format: "%.2f", $0) },
+                              tip: "How much of the code's width the logo covers. Bigger logos look bolder but hide more data — pair with a higher error correction level (Q or H) so the code still scans.")
                 IntSlider(title: "Logo margin", value: $design.logoMargin, range: 0...30)
-                Toggle("Clear dots behind logo", isOn: $design.hideDots)
+                HStack(spacing: 4) {
+                    Toggle("Clear dots behind logo", isOn: $design.hideDots)
+                    InfoTip(title: "Clear dots behind logo", text: "Removes the QR dots directly under the logo instead of drawing them dimmed underneath. Cleaner look, but relies more heavily on error correction to reconstruct that missing data — use Q or H.")
+                }
             }
         }
         .onChange(of: pickerItem) { _, item in

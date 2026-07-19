@@ -35,11 +35,13 @@ struct LabeledSlider: View {
     var range: ClosedRange<Double>
     var step: Double = 1
     var format: (Double) -> String = { String(Int($0)) }
+    var tip: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            HStack {
+            HStack(spacing: 4) {
                 Text(title).font(.caption).foregroundStyle(.secondary)
+                if let tip { InfoTip(title: title, text: tip) }
                 Spacer()
                 Text(format(value)).font(.caption.monospacedDigit()).foregroundStyle(brandBlue)
             }
@@ -54,13 +56,15 @@ struct IntSlider: View {
     @Binding var value: Int
     var range: ClosedRange<Double>
     var suffix: String = ""
+    var tip: String? = nil
 
     var body: some View {
         LabeledSlider(
             title: title,
             value: Binding(get: { Double(value) }, set: { value = Int($0.rounded()) }),
             range: range,
-            format: { "\(Int($0))\(suffix)" }
+            format: { "\(Int($0))\(suffix)" },
+            tip: tip
         )
     }
 }
@@ -73,6 +77,48 @@ struct PanelHeader: View {
         Label(title, systemImage: systemImage)
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(.primary)
+    }
+}
+
+// A small "i" button that pops over a plain-language explanation of a
+// control — tap target for anything whose effect isn't obvious from its
+// label alone (error correction, gradients, quiet zone, etc).
+struct InfoTip: View {
+    let title: String
+    let text: String
+    @State private var showing = false
+
+    var body: some View {
+        Button {
+            showing = true
+        } label: {
+            Image(systemName: "info.circle")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: $showing) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(title).font(.subheadline.weight(.semibold))
+                Text(text).font(.caption).foregroundStyle(.secondary)
+            }
+            .padding()
+            .frame(maxWidth: 280, alignment: .leading)
+            .presentationCompactAdaptation(.popover)
+        }
+    }
+}
+
+// Attaches a title + InfoTip as a row header, so callers don't have to
+// hand-build the HStack each time.
+struct TipLabel: View {
+    let title: String
+    let tip: String
+    var body: some View {
+        HStack(spacing: 4) {
+            Text(title).font(.caption).foregroundStyle(.secondary)
+            InfoTip(title: title, text: tip)
+        }
     }
 }
 
