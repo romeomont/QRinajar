@@ -125,6 +125,30 @@ struct TipLabel: View {
     }
 }
 
+// Standalone controls that float over content (a sheet's close button, the
+// flow's bottom Back/Next bar) don't automatically pick up Liquid Glass the
+// way toolbar items do — apply these explicitly, with a plain fallback for
+// pre-iOS 26.
+struct GlassButtonStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.buttonStyle(.glass)
+        } else {
+            content.buttonStyle(.bordered)
+        }
+    }
+}
+
+struct GlassProminentButtonStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content.buttonStyle(.glassProminent).tint(brandBlue)
+        } else {
+            content.buttonStyle(.borderedProminent).tint(brandBlue)
+        }
+    }
+}
+
 // A soft brand-tinted backdrop behind scroll content.
 struct BackdropGradient: View {
     var body: some View {

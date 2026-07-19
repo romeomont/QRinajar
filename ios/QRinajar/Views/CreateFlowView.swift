@@ -70,7 +70,12 @@ private struct FlowStepView: View {
                 VStack(spacing: 20) {
                     switch step {
                     case .type:
-                        ContentTypePicker()
+                        ContentTypePicker {
+                            // Picking a type is the whole decision for this
+                            // step, so move on immediately instead of making
+                            // the user tap Next too.
+                            path.append(.data)
+                        }
                     case .data:
                         ContentDataForm()
                     case .style:
@@ -83,7 +88,11 @@ private struct FlowStepView: View {
                 .padding()
             }
 
-            footer
+            // Step 1 auto-advances on selection, so there's nothing for a
+            // footer to do there.
+            if step != .type {
+                footer
+            }
         }
         .navigationTitle(step.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -104,12 +113,10 @@ private struct FlowStepView: View {
 
     private var footer: some View {
         HStack(spacing: 12) {
-            if step != .type {
-                Button("Back") {
-                    path.removeLast()
-                }
-                .buttonStyle(.bordered)
+            Button("Back") {
+                path.removeLast()
             }
+            .modifier(GlassButtonStyle())
 
             if step == .export {
                 Button {
@@ -118,8 +125,7 @@ private struct FlowStepView: View {
                 } label: {
                     Text("Save to Library").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(brandBlue)
+                .modifier(GlassProminentButtonStyle())
             } else {
                 Button {
                     if let next = FlowStep(rawValue: step.rawValue + 1) {
@@ -128,8 +134,7 @@ private struct FlowStepView: View {
                 } label: {
                     Text("Next").frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(brandBlue)
+                .modifier(GlassProminentButtonStyle())
             }
         }
         .padding()
@@ -149,39 +154,49 @@ private struct FlowStepView: View {
     }
 }
 
-// Step 1: pick what kind of data this QR code encodes.
+// Step 1: pick what kind of data this QR code encodes. "Custom text" is the
+// catch-all, so it sits last rather than in its declaration order.
 struct ContentTypePicker: View {
     @Environment(QRDesign.self) private var design
+    var onSelect: () -> Void = {}
+
+    private var orderedTypes: [ContentType] {
+        ContentType.allCases.filter { $0 != .text } + [.text]
+    }
+
+    private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
     var body: some View {
-        @Bindable var design = design
-        VStack(spacing: 12) {
-            ForEach(ContentType.allCases) { t in
+        LazyVGrid(columns: columns, spacing: 12) {
+            ForEach(orderedTypes) { t in
                 Button {
                     design.contentType = t
+                    onSelect()
                 } label: {
-                    HStack(spacing: 14) {
-                        Image(systemName: t.symbol)
-                            .font(.title3)
-                            .foregroundStyle(brandBlue)
-                            .frame(width: 28)
-                        Text(t.id == "text" ? "Custom text" : t.label)
-                            .font(.body.weight(.medium))
-                        Spacer()
-                        if design.contentType == t {
-                            Image(systemName: "checkmark.circle.fill").foregroundStyle(brandBlue)
+                    VStack(spacing: 10) {
+                        ZStack {
+                            Circle()
+                                .fill(design.contentType == t ? brandBlue.opacity(0.28) : brandBlue.opacity(0.12))
+                                .frame(width: 56, height: 56)
+                            Image(systemName: t.symbol)
+                                .font(.title2)
+                                .foregroundStyle(brandBlue)
                         }
+                        Text(t.id == "text" ? "Custom text" : t.label)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
                     }
-                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 22)
                     .background(
-                        RoundedRectangle(cornerRadius: 14)
+                        RoundedRectangle(cornerRadius: 24)
                             .fill(design.contentType == t ? brandBlue.opacity(0.15) : Color.secondary.opacity(0.08))
                     )
                     .overlay(
-                        RoundedRectangle(cornerRadius: 14)
+                        RoundedRectangle(cornerRadius: 24)
                             .strokeBorder(design.contentType == t ? brandBlue : Color.clear, lineWidth: 2)
                     )
-                    .contentShape(Rectangle())
+                    .contentShape(RoundedRectangle(cornerRadius: 24))
                 }
                 .buttonStyle(.plain)
             }

@@ -3,6 +3,7 @@ import SwiftUI
 struct LibraryView: View {
     @Environment(QRDesign.self) private var design
     @Environment(PresetStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
     @State private var showSave = false
     @State private var newName = ""
     @State private var showResetConfirm = false
@@ -41,7 +42,18 @@ struct LibraryView: View {
                 }
             }
             .navigationTitle("Library")
-            .toolbar { EditButton() }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+                    .modifier(GlassButtonStyle())
+                }
+                ToolbarItem(placement: .topBarTrailing) { EditButton() }
+            }
             .alert("Save preset", isPresented: $showSave) {
                 TextField("Name", text: $newName)
                 Button("Save") {
