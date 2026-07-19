@@ -101,3 +101,18 @@ with jsQR:
 npm test          # bundles the harness
 # then open test/decode-test.html in a browser; title shows ALL PASS / FAILURES
 ```
+
+## License
+
+This project is licensed under the [ISC License](LICENSE).
+
+It bundles two third-party libraries directly into the shipped app
+(`qr-code-styling`, MIT, and `jsQR`, Apache-2.0) - see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for their full license
+texts. Both files are also copied next to the `.exe` in every Windows build
+(installer and portable), alongside Electron's own bundled license notices.
+
+All other dependencies (esbuild, electron, electron-builder,
+electron-packager, pngjs, and their transitive dependencies) are build/dev
+tooling only and are not included in the distributed app; they're under
+permissive licenses (MIT/ISC/Apache-2.0/BSD).

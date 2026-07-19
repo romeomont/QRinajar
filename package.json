@@ -32,6 +32,10 @@
       "electron/**/*",
       "dist/**/*"
     ],
+    "extraFiles": [
+      "LICENSE",
+      "THIRD-PARTY-NOTICES.md"
+    ],
     "directories": {
       "output": "release"
     },
