@@ -11,16 +11,16 @@
 		00B00EF577B46238BA2C2561 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54DFEA38431E33A90627327 /* LibraryView.swift */; };
 		1B075249D070A77E159A4B84 /* QRCardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82CC9360DD635627DE276007 /* QRCardRenderer.swift */; };
 		1D519547E72C9323014D9190 /* ColorHex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15989D6E2997FEA34245C681 /* ColorHex.swift */; };
-		2AFFA5546B9BEA8B8E93B1F7 /* CreateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ED4FA16DD44A40FBFD27F6F /* CreateView.swift */; };
+		430CA62E4C6BCF21C20F1FCD /* ContentDataForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6968B746A70FF63856385CCB /* ContentDataForm.swift */; };
 		45252347FCEC6139E66B9B0B /* ScanTester.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55467E9FC7F215F96CC08416 /* ScanTester.swift */; };
 		55C8AF673747889AABFA11DC /* QRinajarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1FCDDDFA8C77514180C8F4 /* QRinajarApp.swift */; };
 		6D6614699F9B713E885A5946 /* SelfTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2641B78CE9FB5B638F4ABBA /* SelfTest.swift */; };
 		7947FF07E4BC0D2DDEC54F15 /* Controls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54E4E494C43A295978733450 /* Controls.swift */; };
-		7FE797C248D6C18A63F2C817 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85066DFF8D9D93A3661AAB05 /* OnboardingView.swift */; };
 		83CC28FB2E1F893C93CACCD4 /* PreviewCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48F9437CC0FF3CD237599BA6 /* PreviewCard.swift */; };
 		8D314542EDE89C2FAF87F336 /* StyleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8B480B08B167329BCB3A278 /* StyleView.swift */; };
 		92D6A4AE6CDB80C6C2EFD5F2 /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35BD9572321440DA2C20778 /* ExportView.swift */; };
 		9EC9FF8360883C6542F074EC /* PayloadBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC6BC78C732A69572C5A4183 /* PayloadBuilder.swift */; };
+		A0928EE217DB28225D212280 /* CreateFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BBFAB73043B715FD632819E /* CreateFlowView.swift */; };
 		B5CDE8A8487DAF00F297E5F1 /* QRDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = D03735EC53B4F5987B30E65F /* QRDesign.swift */; };
 		B6473A7142DAC0163863293A /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B041FFD1037BD71E88CC4B22 /* RootTabView.swift */; };
 		BED583CF31E8218AE37A5AEE /* PresetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1E748DA5D4FD2BEB0B029 /* PresetStore.swift */; };
@@ -28,15 +28,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0BBFAB73043B715FD632819E /* CreateFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateFlowView.swift; sourceTree = "<group>"; };
 		15989D6E2997FEA34245C681 /* ColorHex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorHex.swift; sourceTree = "<group>"; };
 		2C1FCDDDFA8C77514180C8F4 /* QRinajarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRinajarApp.swift; sourceTree = "<group>"; };
 		40394A28D441C9A662CA0879 /* QRinajar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = QRinajar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48F9437CC0FF3CD237599BA6 /* PreviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewCard.swift; sourceTree = "<group>"; };
 		54E4E494C43A295978733450 /* Controls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controls.swift; sourceTree = "<group>"; };
 		55467E9FC7F215F96CC08416 /* ScanTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanTester.swift; sourceTree = "<group>"; };
+		6968B746A70FF63856385CCB /* ContentDataForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDataForm.swift; sourceTree = "<group>"; };
 		82CC9360DD635627DE276007 /* QRCardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCardRenderer.swift; sourceTree = "<group>"; };
-		85066DFF8D9D93A3661AAB05 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		9ED4FA16DD44A40FBFD27F6F /* CreateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateView.swift; sourceTree = "<group>"; };
 		A35BD9572321440DA2C20778 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
 		A54DFEA38431E33A90627327 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		A8B480B08B167329BCB3A278 /* StyleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyleView.swift; sourceTree = "<group>"; };
@@ -81,11 +81,11 @@
 			isa = PBXGroup;
 			children = (
 				15989D6E2997FEA34245C681 /* ColorHex.swift */,
+				6968B746A70FF63856385CCB /* ContentDataForm.swift */,
 				54E4E494C43A295978733450 /* Controls.swift */,
-				9ED4FA16DD44A40FBFD27F6F /* CreateView.swift */,
+				0BBFAB73043B715FD632819E /* CreateFlowView.swift */,
 				A35BD9572321440DA2C20778 /* ExportView.swift */,
 				A54DFEA38431E33A90627327 /* LibraryView.swift */,
-				85066DFF8D9D93A3661AAB05 /* OnboardingView.swift */,
 				48F9437CC0FF3CD237599BA6 /* PreviewCard.swift */,
 				A8B480B08B167329BCB3A278 /* StyleView.swift */,
 			);
@@ -200,11 +200,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D519547E72C9323014D9190 /* ColorHex.swift in Sources */,
+				430CA62E4C6BCF21C20F1FCD /* ContentDataForm.swift in Sources */,
 				7947FF07E4BC0D2DDEC54F15 /* Controls.swift in Sources */,
-				2AFFA5546B9BEA8B8E93B1F7 /* CreateView.swift in Sources */,
+				A0928EE217DB28225D212280 /* CreateFlowView.swift in Sources */,
 				92D6A4AE6CDB80C6C2EFD5F2 /* ExportView.swift in Sources */,
 				00B00EF577B46238BA2C2561 /* LibraryView.swift in Sources */,
-				7FE797C248D6C18A63F2C817 /* OnboardingView.swift in Sources */,
 				9EC9FF8360883C6542F074EC /* PayloadBuilder.swift in Sources */,
 				BED583CF31E8218AE37A5AEE /* PresetStore.swift in Sources */,
 				83CC28FB2E1F893C93CACCD4 /* PreviewCard.swift in Sources */,

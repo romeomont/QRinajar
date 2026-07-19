@@ -6,7 +6,7 @@ BUNDLE_ID="com.qrinajar.app"
 OUT_DIR="$(cd "$(dirname "$0")" && pwd)/screenshots"
 mkdir -p "$OUT_DIR"
 
-TABS=(create 0 style 1 export 2 library 3)
+TABS=(type 0 data 1 style 2 export 3)
 
 capture_appearance() {
   local appearance="$1"

@@ -1,7 +1,8 @@
 import SwiftUI
 import UIKit
 
-struct ExportView: View {
+// Share/save + scan self-test — the flow's final "Export" step content.
+struct ExportPanel: View {
     @Environment(QRDesign.self) private var design
     @State private var scanResult: ScanTester.Result?
     @State private var saveMessage: String?
@@ -17,57 +18,48 @@ struct ExportView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    PreviewCard(maxHeight: 380)
+        VStack(spacing: 20) {
+            GroupCard {
+                PanelHeader(title: "Share & save", systemImage: "square.and.arrow.up")
 
-                    GroupCard {
-                        PanelHeader(title: "Share & save", systemImage: "square.and.arrow.up")
-
-                        HStack(spacing: 12) {
-                            if let d = QRCardRenderer.pngData(design.snapshot), let url = exportURL(ext: "png", data: d) {
-                                ShareLink(item: url) { exportLabel("PNG", "photo") }
-                            }
-                            if let d = QRCardRenderer.jpegData(design.snapshot), let url = exportURL(ext: "jpg", data: d) {
-                                ShareLink(item: url) { exportLabel("JPEG", "photo.on.rectangle") }
-                            }
-                            if let s = QRCardRenderer.svgString(design.snapshot),
-                               let url = exportURL(ext: "svg", data: Data(s.utf8)) {
-                                ShareLink(item: url) { exportLabel("SVG", "curlybraces") }
-                            }
-                        }
-
-                        HStack(spacing: 12) {
-                            Button {
-                                saveToPhotos()
-                            } label: { exportLabel("Save to Photos", "square.and.arrow.down") }
-                            .buttonStyle(.borderedProminent)
-
-                            Button {
-                                copyImage()
-                            } label: { exportLabel("Copy", "doc.on.doc") }
-                            .buttonStyle(.bordered)
-                        }
-
-                        if let saveMessage {
-                            Text(saveMessage).font(.caption).foregroundStyle(.secondary)
-                        }
+                HStack(spacing: 12) {
+                    if let d = QRCardRenderer.pngData(design.snapshot), let url = exportURL(ext: "png", data: d) {
+                        ShareLink(item: url) { exportLabel("PNG", "photo") }
                     }
-
-                    GroupCard {
-                        PanelHeader(title: "Scan self-test", systemImage: "qrcode.viewfinder")
-                        Text("Renders the code and decodes it offline with Vision to confirm it scans.")
-                            .font(.caption).foregroundStyle(.secondary)
-                        Button("Test scan") { runScanTest() }
-                            .buttonStyle(.bordered)
-                        if let scanResult { scanResultView(scanResult) }
+                    if let d = QRCardRenderer.jpegData(design.snapshot), let url = exportURL(ext: "jpg", data: d) {
+                        ShareLink(item: url) { exportLabel("JPEG", "photo.on.rectangle") }
+                    }
+                    if let s = QRCardRenderer.svgString(design.snapshot),
+                       let url = exportURL(ext: "svg", data: Data(s.utf8)) {
+                        ShareLink(item: url) { exportLabel("SVG", "curlybraces") }
                     }
                 }
-                .padding()
+
+                HStack(spacing: 12) {
+                    Button {
+                        saveToPhotos()
+                    } label: { exportLabel("Save to Photos", "square.and.arrow.down") }
+                    .buttonStyle(.borderedProminent)
+
+                    Button {
+                        copyImage()
+                    } label: { exportLabel("Copy", "doc.on.doc") }
+                    .buttonStyle(.bordered)
+                }
+
+                if let saveMessage {
+                    Text(saveMessage).font(.caption).foregroundStyle(.secondary)
+                }
             }
-            .navigationTitle("Export")
-            .background(BackdropGradient())
+
+            GroupCard {
+                PanelHeader(title: "Scan self-test", systemImage: "qrcode.viewfinder")
+                Text("Renders the code and decodes it offline with Vision to confirm it scans.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Button("Test scan") { runScanTest() }
+                    .buttonStyle(.bordered)
+                if let scanResult { scanResultView(scanResult) }
+            }
         }
     }
 

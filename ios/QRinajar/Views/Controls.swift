@@ -100,10 +100,13 @@ struct InfoTip: View {
         .popover(isPresented: $showing) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(title).font(.subheadline.weight(.semibold))
-                Text(text).font(.caption).foregroundStyle(.secondary)
+                Text(text)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding()
-            .frame(maxWidth: 280, alignment: .leading)
+            .frame(width: 280, alignment: .leading)
             .presentationCompactAdaptation(.popover)
         }
     }

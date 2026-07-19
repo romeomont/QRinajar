@@ -1,149 +1,128 @@
 import SwiftUI
 import PhotosUI
 
-struct StyleView: View {
+// Style preset picker (Square / Rounded / Custom) — used at the top of the
+// "style" flow step.
+struct StylePresetRow: View {
+    @Environment(QRDesign.self) private var design
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ForEach(StylePreset.Kind.allCases) { kind in
+                StylePresetCard(kind: kind, active: design.activeStyle == kind) {
+                    switch kind {
+                    case .square: design.applyStyle(.square)
+                    case .rounded: design.applyStyle(.rounded)
+                    case .custom: break
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Fine-tune panels (shape, module style, eyes, background, logo, border/caption)
+// — used below the preset row in the "style" flow step.
+struct StyleCustomPanels: View {
     @Environment(QRDesign.self) private var design
 
     var body: some View {
         @Bindable var design = design
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Pinned above the scroll area so the live preview stays visible
-                // while fine-tuning sliders below.
-                PreviewCard(maxHeight: 200)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
+        VStack(spacing: 20) {
+            GroupCard {
+                PanelHeader(title: "Shape & layout", systemImage: "square.on.square")
+                Picker("Overall shape", selection: $design.shape) {
+                    Text("Square").tag("square")
+                    Text("Circle").tag("circle")
+                }
+                IntSlider(title: "Size (px)", value: $design.size, range: 200...2000,
+                          tip: "The pixel dimensions of the exported QR image. Bigger sizes stay crisp when printed large; smaller ones are lighter to share.")
+                IntSlider(title: "Quiet-zone margin", value: $design.margin, range: 0...80,
+                          tip: "Blank space around the code. Scanners need a clear quiet zone to lock on — too little margin can make the code unreadable, especially when printed close to other content.")
+                IntSlider(title: "Card corner rounding", value: $design.borderRadius, range: 0...60)
+            }
 
-                ScrollView {
-                    VStack(spacing: 20) {
-                        // Style preset cards
-                        HStack(spacing: 12) {
-                            ForEach(StylePreset.Kind.allCases) { kind in
-                                StylePresetCard(kind: kind, active: design.activeStyle == kind) {
-                                    switch kind {
-                                    case .square: design.applyStyle(.square)
-                                    case .rounded: design.applyStyle(.rounded)
-                                    case .custom: break
-                                    }
-                                }
-                            }
-                        }
-
-                        if design.activeStyle == .custom || true {
-                            customPanels(design)
-                        }
+            GroupCard {
+                PanelHeader(title: "Module style", systemImage: "circle.grid.3x3.fill")
+                Picker("Dot style", selection: $design.dotStyle) {
+                    Text("Square").tag("square")
+                    Text("Dots").tag("dots")
+                    Text("Rounded").tag("rounded")
+                    Text("Extra rounded").tag("extra-rounded")
+                    Text("Classy").tag("classy")
+                    Text("Classy rounded").tag("classy-rounded")
+                }
+                HexColorPicker(title: "Dot color", hex: $design.dotColor)
+                HStack(spacing: 4) {
+                    Toggle("Use gradient for dots", isOn: $design.dotGradient)
+                    InfoTip(title: "Dot gradient", text: "Blends two colors across the code instead of one flat color. Looks great, but lower contrast between the two colors can make the code harder to scan — keep them reasonably distinct.")
+                }
+                if design.dotGradient {
+                    HexColorPicker(title: "Gradient color 2", hex: $design.dotColor2)
+                    Picker("Gradient type", selection: $design.gradientType) {
+                        Text("Linear").tag("linear")
+                        Text("Radial").tag("radial")
                     }
-                    .padding()
+                    .pickerStyle(.segmented)
+                    IntSlider(title: "Rotation", value: $design.gradientRot, range: 0...360, suffix: "°")
                 }
             }
-            .navigationTitle("Style")
-            .background(BackdropGradient())
-        }
-    }
 
-    @ViewBuilder
-    private func customPanels(_ design: QRDesign) -> some View {
-        @Bindable var design = design
-
-        // Shape & layout
-        GroupCard {
-            PanelHeader(title: "Shape & layout", systemImage: "square.on.square")
-            Picker("Overall shape", selection: $design.shape) {
-                Text("Square").tag("square")
-                Text("Circle").tag("circle")
-            }
-            IntSlider(title: "Size (px)", value: $design.size, range: 200...2000,
-                      tip: "The pixel dimensions of the exported QR image. Bigger sizes stay crisp when printed large; smaller ones are lighter to share.")
-            IntSlider(title: "Quiet-zone margin", value: $design.margin, range: 0...80,
-                      tip: "Blank space around the code. Scanners need a clear quiet zone to lock on — too little margin can make the code unreadable, especially when printed close to other content.")
-            IntSlider(title: "Card corner rounding", value: $design.borderRadius, range: 0...60)
-        }
-
-        // Module style
-        GroupCard {
-            PanelHeader(title: "Module style", systemImage: "circle.grid.3x3.fill")
-            Picker("Dot style", selection: $design.dotStyle) {
-                Text("Square").tag("square")
-                Text("Dots").tag("dots")
-                Text("Rounded").tag("rounded")
-                Text("Extra rounded").tag("extra-rounded")
-                Text("Classy").tag("classy")
-                Text("Classy rounded").tag("classy-rounded")
-            }
-            HexColorPicker(title: "Dot color", hex: $design.dotColor)
-            HStack(spacing: 4) {
-                Toggle("Use gradient for dots", isOn: $design.dotGradient)
-                InfoTip(title: "Dot gradient", text: "Blends two colors across the code instead of one flat color. Looks great, but lower contrast between the two colors can make the code harder to scan — keep them reasonably distinct.")
-            }
-            if design.dotGradient {
-                HexColorPicker(title: "Gradient color 2", hex: $design.dotColor2)
-                Picker("Gradient type", selection: $design.gradientType) {
-                    Text("Linear").tag("linear")
-                    Text("Radial").tag("radial")
+            GroupCard {
+                HStack(spacing: 4) {
+                    PanelHeader(title: "Corner eyes", systemImage: "viewfinder")
+                    InfoTip(title: "Corner eyes", text: "The three big square markers in the code's corners that scanners use to find and orient it. They can be styled separately from the rest of the dots, but keep them high-contrast — they matter most for reliable scanning.")
                 }
-                .pickerStyle(.segmented)
-                IntSlider(title: "Rotation", value: $design.gradientRot, range: 0...360, suffix: "°")
+                Picker("Outer eye style", selection: $design.cornerSquareStyle) {
+                    Text("Match dots").tag("")
+                    Text("Square").tag("square")
+                    Text("Dot").tag("dot")
+                    Text("Rounded").tag("rounded")
+                    Text("Extra rounded").tag("extra-rounded")
+                    Text("Dots").tag("dots")
+                    Text("Classy").tag("classy")
+                    Text("Classy rounded").tag("classy-rounded")
+                }
+                Picker("Inner eye style", selection: $design.cornerDotStyle) {
+                    Text("Match dots").tag("")
+                    Text("Square").tag("square")
+                    Text("Dot").tag("dot")
+                    Text("Rounded").tag("rounded")
+                    Text("Extra rounded").tag("extra-rounded")
+                    Text("Dots").tag("dots")
+                    Text("Classy").tag("classy")
+                    Text("Classy rounded").tag("classy-rounded")
+                }
+                HexColorPicker(title: "Outer eye color", hex: $design.cornerSquareColor)
+                HexColorPicker(title: "Inner eye color", hex: $design.cornerDotColor)
             }
-        }
 
-        // Corner eyes
-        GroupCard {
-            HStack(spacing: 4) {
-                PanelHeader(title: "Corner eyes", systemImage: "viewfinder")
-                InfoTip(title: "Corner eyes", text: "The three big square markers in the code's corners that scanners use to find and orient it. They can be styled separately from the rest of the dots, but keep them high-contrast — they matter most for reliable scanning.")
+            GroupCard {
+                PanelHeader(title: "Background", systemImage: "square.fill.on.circle.fill")
+                HexColorPicker(title: "Background color", hex: $design.bgColor)
+                HStack(spacing: 4) {
+                    Toggle("Transparent background", isOn: $design.bgTransparent)
+                    InfoTip(title: "Transparent background", text: "Removes the solid background so the QR code sits directly on whatever it's placed over — useful for overlaying on photos or colored materials. Make sure there's still enough contrast against the dots to scan reliably.")
+                }
             }
-            Picker("Outer eye style", selection: $design.cornerSquareStyle) {
-                Text("Match dots").tag("")
-                Text("Square").tag("square")
-                Text("Dot").tag("dot")
-                Text("Rounded").tag("rounded")
-                Text("Extra rounded").tag("extra-rounded")
-                Text("Dots").tag("dots")
-                Text("Classy").tag("classy")
-                Text("Classy rounded").tag("classy-rounded")
-            }
-            Picker("Inner eye style", selection: $design.cornerDotStyle) {
-                Text("Match dots").tag("")
-                Text("Square").tag("square")
-                Text("Dot").tag("dot")
-                Text("Rounded").tag("rounded")
-                Text("Extra rounded").tag("extra-rounded")
-                Text("Dots").tag("dots")
-                Text("Classy").tag("classy")
-                Text("Classy rounded").tag("classy-rounded")
-            }
-            HexColorPicker(title: "Outer eye color", hex: $design.cornerSquareColor)
-            HexColorPicker(title: "Inner eye color", hex: $design.cornerDotColor)
-        }
 
-        // Background
-        GroupCard {
-            PanelHeader(title: "Background", systemImage: "square.fill.on.circle.fill")
-            HexColorPicker(title: "Background color", hex: $design.bgColor)
-            HStack(spacing: 4) {
-                Toggle("Transparent background", isOn: $design.bgTransparent)
-                InfoTip(title: "Transparent background", text: "Removes the solid background so the QR code sits directly on whatever it's placed over — useful for overlaying on photos or colored materials. Make sure there's still enough contrast against the dots to scan reliably.")
-            }
-        }
+            LogoPanel()
 
-        // Logo
-        LogoPanel()
-
-        // Border & caption
-        GroupCard {
-            PanelHeader(title: "Border & caption", systemImage: "textformat")
-            LabeledField("Caption text") {
-                TextField("e.g. Repeater-West — Mast 3", text: $design.caption, axis: .vertical)
-                    .lineLimit(1...4)
+            GroupCard {
+                PanelHeader(title: "Border & caption", systemImage: "textformat")
+                LabeledField("Caption text") {
+                    TextField("e.g. Repeater-West — Mast 3", text: $design.caption, axis: .vertical)
+                        .lineLimit(1...4)
+                }
+                HexColorPicker(title: "Caption color", hex: $design.captionColor)
+                IntSlider(title: "Caption size", value: $design.captionSize, range: 10...48)
+                Toggle("Show border around card", isOn: $design.borderEnabled)
+                if design.borderEnabled {
+                    HexColorPicker(title: "Border color", hex: $design.borderColor)
+                    IntSlider(title: "Border width", value: $design.borderWidth, range: 0...20)
+                }
+                IntSlider(title: "Card padding", value: $design.cardPadding, range: 0...60)
             }
-            HexColorPicker(title: "Caption color", hex: $design.captionColor)
-            IntSlider(title: "Caption size", value: $design.captionSize, range: 10...48)
-            Toggle("Show border around card", isOn: $design.borderEnabled)
-            if design.borderEnabled {
-                HexColorPicker(title: "Border color", hex: $design.borderColor)
-                IntSlider(title: "Border width", value: $design.borderWidth, range: 0...20)
-            }
-            IntSlider(title: "Card padding", value: $design.cardPadding, range: 0...60)
         }
     }
 }
