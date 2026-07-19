@@ -1,5 +1,11 @@
 # QRinajar for iOS — native SwiftUI port
 
+> **Historical.** This was the original implementation plan and describes
+> a bottom-tab-bar architecture. The shipped app instead uses a single
+> guided flow (pick type → enter details → style → export), pushed onto a
+> real `NavigationStack`. Kept for context on *why* files are shaped the
+> way they are; see `HANDOFF.md` for the current architecture.
+
 ## Context
 QRinajar (`~/QRinajar`) is a fully offline styled-QR generator currently shipped as an Electron/Windows app and a single HTML file (`src/main.js` + `src/index.html`). The user wants a native iOS app version: functional, attractive, following iOS 26/27 (Liquid Glass era) design conventions, with a bottom tab bar. The port lives in `ios/` inside the QRinajar repo and uses the **dagronf/QRCode** Swift package (SPM) for styled rendering.
 
