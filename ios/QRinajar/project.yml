@@ -19,6 +19,7 @@ targets:
       - path: Rendering
       - path: Views
       - path: Assets.xcassets
+      - path: AppIcon.icon
     info:
       path: Info.plist
       properties:

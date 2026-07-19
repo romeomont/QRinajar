@@ -25,6 +25,7 @@
 		B5CDE8A8487DAF00F297E5F1 /* QRDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = D03735EC53B4F5987B30E65F /* QRDesign.swift */; };
 		B6473A7142DAC0163863293A /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B041FFD1037BD71E88CC4B22 /* RootTabView.swift */; };
 		B8990A8D35064282D557711C /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C4AC0F476EFBDDDB52A23E /* WelcomeView.swift */; };
+		BC8BF343500D1CA781F3AB23 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 7EC935D742CE18CDCC7EFB30 /* AppIcon.icon */; };
 		BE5904185A5867FA8EE0F59B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FE3ED524B58F430F1248833 /* SettingsView.swift */; };
 		BED583CF31E8218AE37A5AEE /* PresetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1E748DA5D4FD2BEB0B029 /* PresetStore.swift */; };
 		D09A2C326F42C478B5AD774F /* QRCode in Frameworks */ = {isa = PBXBuildFile; productRef = DFB13FE9E93EF9F37C3DC394 /* QRCode */; };
@@ -41,6 +42,7 @@
 		55467E9FC7F215F96CC08416 /* ScanTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanTester.swift; sourceTree = "<group>"; };
 		6968B746A70FF63856385CCB /* ContentDataForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDataForm.swift; sourceTree = "<group>"; };
 		7C99D421C8A0B37586239DF8 /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearance.swift; sourceTree = "<group>"; };
+		7EC935D742CE18CDCC7EFB30 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		7FE3ED524B58F430F1248833 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		82CC9360DD635627DE276007 /* QRCardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCardRenderer.swift; sourceTree = "<group>"; };
 		A35BD9572321440DA2C20778 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 		5F424A315955C2285D631172 = {
 			isa = PBXGroup;
 			children = (
+				7EC935D742CE18CDCC7EFB30 /* AppIcon.icon */,
 				F2A608C4C2DCE90FFF5D29E9 /* Assets.xcassets */,
 				5481D792CF345849678C529F /* App */,
 				A9686A752DA867837616E23C /* Model */,
@@ -197,6 +200,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC8BF343500D1CA781F3AB23 /* AppIcon.icon in Resources */,
 				008B31116298BC5000AEED13 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
