@@ -3,7 +3,7 @@ import SwiftUI
 // The whole app is one guided flow: pick what you're sharing, enter the
 // details, style it, then save/export. Library is reachable at any step via
 // the toolbar button.
-enum FlowStep: Int, CaseIterable {
+enum FlowStep: Int, CaseIterable, Hashable {
     case type, data, style, export
 
     var title: String {
@@ -17,70 +17,88 @@ enum FlowStep: Int, CaseIterable {
 }
 
 struct CreateFlowView: View {
-    @Environment(QRDesign.self) private var design
-    @Environment(PresetStore.self) private var store
-
-    @State private var step: FlowStep
-    @State private var showLibrary = false
-    @State private var showSaveAlert = false
-    @State private var saveName = ""
+    // Real pushes onto a NavigationStack, one per step, so the system's
+    // edge-swipe-to-go-back gesture works the same as any other iOS app —
+    // swapping a single view's content in place (the old approach) doesn't
+    // give you that gesture for free.
+    @State private var path: [FlowStep] = []
 
     init() {
         // Lets the screenshot/self-test tooling jump straight to a step
         // (see capture_screenshots.sh), same trick the old tab bar used.
         let raw = Int(ProcessInfo.processInfo.environment["QRINAJAR_TAB"] ?? "0") ?? 0
-        _step = State(initialValue: FlowStep(rawValue: raw) ?? .type)
+        if let target = FlowStep(rawValue: raw), target != .type {
+            _path = State(initialValue: Array(FlowStep.allCases[1...target.rawValue]))
+        }
     }
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                ProgressView(value: Double(step.rawValue + 1), total: Double(FlowStep.allCases.count))
-                    .tint(brandBlue)
+        NavigationStack(path: $path) {
+            FlowStepView(step: .type, path: $path)
+                .navigationDestination(for: FlowStep.self) { step in
+                    FlowStepView(step: step, path: $path)
+                }
+        }
+    }
+}
+
+private struct FlowStepView: View {
+    let step: FlowStep
+    @Binding var path: [FlowStep]
+
+    @Environment(QRDesign.self) private var design
+    @Environment(PresetStore.self) private var store
+    @State private var showLibrary = false
+    @State private var showSaveAlert = false
+    @State private var saveName = ""
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ProgressView(value: Double(step.rawValue + 1), total: Double(FlowStep.allCases.count))
+                .tint(brandBlue)
+                .padding(.horizontal)
+                .padding(.top, 8)
+
+            if step != .type {
+                // Pinned so the live effect of every control stays visible.
+                PreviewCard(maxHeight: step == .export ? 320 : 200, bare: step == .data)
                     .padding(.horizontal)
                     .padding(.top, 8)
-
-                if step != .type {
-                    // Pinned so the live effect of every control stays visible.
-                    PreviewCard(maxHeight: step == .export ? 320 : 200, bare: step == .data)
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                }
-
-                ScrollView {
-                    VStack(spacing: 20) {
-                        switch step {
-                        case .type:
-                            ContentTypePicker()
-                        case .data:
-                            ContentDataForm()
-                        case .style:
-                            StylePresetRow()
-                            StyleCustomPanels()
-                        case .export:
-                            ExportPanel()
-                        }
-                    }
-                    .padding()
-                }
-
-                footer
             }
-            .navigationTitle(step.title)
-            .navigationBarTitleDisplayMode(.inline)
-            .background(BackdropGradient())
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showLibrary = true
-                    } label: {
-                        Image(systemName: "tray.full")
+
+            ScrollView {
+                VStack(spacing: 20) {
+                    switch step {
+                    case .type:
+                        ContentTypePicker()
+                    case .data:
+                        ContentDataForm()
+                    case .style:
+                        StylePresetRow()
+                        StyleCustomPanels()
+                    case .export:
+                        ExportPanel()
                     }
                 }
+                .padding()
             }
-            .sheet(isPresented: $showLibrary) {
-                LibraryView()
+
+            footer
+        }
+        .navigationTitle(step.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .background(BackdropGradient())
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showLibrary = true
+                } label: {
+                    Image(systemName: "tray.full")
+                }
             }
+        }
+        .sheet(isPresented: $showLibrary) {
+            LibraryView()
         }
     }
 
@@ -88,7 +106,7 @@ struct CreateFlowView: View {
         HStack(spacing: 12) {
             if step != .type {
                 Button("Back") {
-                    withAnimation { step = FlowStep(rawValue: step.rawValue - 1) ?? .type }
+                    path.removeLast()
                 }
                 .buttonStyle(.bordered)
             }
@@ -104,7 +122,9 @@ struct CreateFlowView: View {
                 .tint(brandBlue)
             } else {
                 Button {
-                    withAnimation { step = FlowStep(rawValue: step.rawValue + 1) ?? .export }
+                    if let next = FlowStep(rawValue: step.rawValue + 1) {
+                        path.append(next)
+                    }
                 } label: {
                     Text("Next").frame(maxWidth: .infinity)
                 }
