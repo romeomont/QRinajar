@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    -webkit-app-region: drag;
+    user-select: none;
+    border: 1px solid #2d3644;
+    overflow: hidden;
+  }
+  img {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 14px;
+    -webkit-app-region: no-drag;
+  }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .version {
+    font-size: 12.5px;
+    color: #8b98a9;
+    margin-bottom: 18px;
+  }
+  .links {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    margin-bottom: 20px;
+    -webkit-app-region: no-drag;
+  }
+  a {
+    color: #35b5e5;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  a:hover { text-decoration: underline; }
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #8b98a9;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+  }
+  input[type="checkbox"] { accent-color: #35b5e5; cursor: pointer; }
+</style>
+</head>
+<body>
+  <img src="logo.png" alt="QRinajar">
+  <h1>QRinajar</h1>
+  <div class="version" id="version">v...</div>
+  <div class="links">
+    <a id="license-link" href="#">License</a>
+    <a id="repo-link" href="#">GitHub Repo</a>
+  </div>
+  <label>
+    <input type="checkbox" id="dont-show">
+    Don't show this again
+  </label>
+
+<script>
+  window.splashAPI.onVersion((version) => {
+    document.getElementById("version").textContent = "v" + version;
+  });
+
+  document.getElementById("license-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    window.splashAPI.openExternal("https://github.com/romeomont/QRinajar/blob/master/LICENSE");
+  });
+
+  document.getElementById("repo-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    window.splashAPI.openExternal("https://github.com/romeomont/QRinajar");
+  });
+
+  document.getElementById("dont-show").addEventListener("change", (e) => {
+    window.splashAPI.setDontShowAgain(e.target.checked);
+  });
+</script>
+</body>
+</html>

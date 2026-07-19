@@ -4,7 +4,7 @@ This project is licensed under the ISC License (see `LICENSE`). It bundles
 the following third-party code, which is redistributed under its own
 license as required by that license's terms. Both notices below are for
 libraries that are compiled directly into the shipped app
-(`dist/qr-code-generator.html` and the Windows builds derived from it) via
+(`dist/qrinajar.html` and the Windows builds derived from it) via
 esbuild, not just used at build time.
 
 Electron itself is bundled into the Windows app (installer and portable

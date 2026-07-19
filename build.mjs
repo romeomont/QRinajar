@@ -21,7 +21,7 @@ const out = html
   .replace("__VERSION__", version);
 
 mkdirSync("dist", { recursive: true });
-writeFileSync("dist/qr-code-generator.html", out);
+writeFileSync("dist/qrinajar.html", out);
 console.log(
-  `Built dist/qr-code-generator.html (${(out.length / 1024).toFixed(0)} KB), fully offline, single file.`
+  `Built dist/qrinajar.html (${(out.length / 1024).toFixed(0)} KB), fully offline, single file.`
 );

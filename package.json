@@ -1,6 +1,6 @@
 {
-  "name": "qr-code-generator",
-  "version": "0.1.0",
+  "name": "qrinajar",
+  "version": "0.1.1",
   "description": "Offline QR code generator, packaged as a Windows desktop app.",
   "main": "electron/main.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "build": "node build.mjs",
     "start": "npm run build && electron .",
     "dist:win": "npm run build && electron-builder --win",
-    "package:win": "npm run build && electron-packager . \"QR Code Generator\" --platform=win32 --arch=x64 --out=release --overwrite --icon=build/icon.ico"
+    "package:win": "npm run build && electron-packager . \"QRinajar\" --platform=win32 --arch=x64 --out=release --overwrite --icon=build/icon.ico"
   },
   "keywords": [],
   "author": "",
@@ -26,8 +26,8 @@
     "pngjs": "^7.0.0"
   },
   "build": {
-    "appId": "com.romeomont.qrcodegenerator",
-    "productName": "QR Code Generator",
+    "appId": "com.romeomont.qrinajar",
+    "productName": "QRinajar",
     "files": [
       "electron/**/*",
       "dist/**/*"
@@ -62,14 +62,17 @@
       "deleteAppDataOnUninstall": true,
       "uninstallDisplayName": "${productName}",
       "license": "build/privacy-notice.txt",
-      "artifactName": "QR Code Generator Installer.exe",
+      "artifactName": "QRinajarInstaller.exe",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
       "installerHeaderIcon": "build/icon.ico",
       "createDesktopShortcut": false,
       "createStartMenuShortcut": false,
-      "include": "build/installer.nsh",
-      "warningsAsErrors": false
+      "warningsAsErrors": false,
+      "include": "build/installer.nsh"
+    },
+    "portable": {
+      "artifactName": "QRinajarPortable.exe"
     }
   }
 }

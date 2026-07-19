@@ -1,7 +1,13 @@
-# QR Code Generator
+# QRinajar
 
 <p align="center">
-  <img src="assets/logo.png" alt="QR Code Generator logo" width="180">
+  <img src="assets/logo.png" alt="QRinajar logo" width="180">
+</p>
+
+<p align="center">
+  <a href="https://github.com/romeomont/QRinajar/releases/latest">
+    <img src="https://img.shields.io/badge/Download-latest%20release-35b5e5?style=for-the-badge" alt="Download latest release">
+  </a>
 </p>
 
 Fully offline QR code generator with heavy styling control (shapes, colors,
@@ -12,23 +18,28 @@ profile).
 Available two ways:
 
 - **Windows app** - installer or portable exe, no browser needed.
-- **Single HTML file** - `dist/qr-code-generator.html`, zero dependencies at
+- **Single HTML file** - `dist/qrinajar.html`, zero dependencies at
   runtime. Copy it to a laptop, phone, or USB stick and open it in any
   browser. No internet is ever used: the QR library (qr-code-styling), the
   scan-test decoder (jsQR), and all UI are inlined into the file.
 
 ## Windows app
 
-Grab the latest build from `release/`:
+Grab the latest build from the [Releases page](https://github.com/romeomont/QRinajar/releases/latest):
 
-- **`QR Code Generator Installer.exe`** - installer. Run it, follow the
+- **`QRinajarInstaller.exe`** - installer. Run it, follow the
   wizard (you can choose the install location). During setup you can
   optionally add a Start Menu entry and/or a Desktop shortcut - neither is
   required. A proper uninstaller is included either way. Uninstalling (via
-  **Settings → Apps** or `Uninstall QR Code Generator.exe` in the install
+  **Settings → Apps** or `Uninstall QRinajar.exe` in the install
   folder) removes the app files, any shortcuts it created, and its saved
   settings - nothing left behind.
-- **`QR Code Generator 1.0.0.exe`** - portable, no install. Just run it.
+- **`QRinajarPortable.exe`** - portable, no install. Just run it.
+
+The first time the app launches, it shows a brief splash screen (icon,
+version, links to the license and this repo) with a "Don't show this again"
+option; after that it opens straight to the editor unless you choose to see
+it again.
 
 The app is unsigned, so Windows SmartScreen will show a warning the first
 time it runs. Click **More info → Run anyway**. This is expected for
@@ -39,8 +50,8 @@ To build these yourself (requires Windows Developer Mode enabled - see
 
 ```
 npm install
-npm run dist:win     # -> release/QR Code Generator Installer.exe (installer)
-                      #    release/QR Code Generator 1.0.0.exe (portable)
+npm run dist:win     # -> release/QRinajarInstaller.exe (installer)
+                      #    release/QRinajarPortable.exe (portable)
 ```
 
 ## Features
@@ -68,7 +79,7 @@ npm run dist:win     # -> release/QR Code Generator Installer.exe (installer)
 
 ```
 npm install
-npm run build     # -> dist/qr-code-generator.html
+npm run build     # -> dist/qrinajar.html
 ```
 
 `build.mjs` bundles `src/main.js` with esbuild and inlines it into
@@ -76,13 +87,14 @@ npm run build     # -> dist/qr-code-generator.html
 
 ## Building the Windows app
 
-The Electron shell lives in `electron/main.js` and just loads
-`dist/qr-code-generator.html` in a native window.
+The Electron shell lives in `electron/main.js`. It shows a splash screen
+(`electron/splash.html`) before loading `dist/qrinajar.html` in the main
+window.
 
 ```
 npm start            # build + launch in dev mode
-npm run package:win   # -> release/QR Code Generator-win32-x64/ (portable folder, no installer)
-npm run dist:win      # -> release/QR Code Generator Installer.exe (installer) + portable exe
+npm run package:win   # -> release/QRinajar-win32-x64/ (portable folder, no installer)
+npm run dist:win      # -> release/QRinajarInstaller.exe (installer) + portable exe
 ```
 
 `dist:win` (electron-builder, NSIS) needs Windows Developer Mode turned on

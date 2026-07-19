@@ -54,7 +54,7 @@ const PRESET_DATA = {
   text: "Hello, world!",
 };
 
-const STORE_KEY = "qr-code-generator-settings-v1";
+const STORE_KEY = "qrinajar-settings-v1";
 
 function readUI() {
   return {
@@ -455,7 +455,7 @@ function canvasToBlob(canvas, mime, quality) {
 function filename() {
   const d = new Date();
   const stamp = d.toISOString().slice(0, 10);
-  return "qr-code-" + stamp;
+  return "qrinajar-" + stamp;
 }
 async function download(ext) {
   const s = readUI();
