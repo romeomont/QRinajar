@@ -7,33 +7,10 @@ struct ExportPanel: View {
     @State private var scanResult: ScanTester.Result?
     @State private var saveMessage: String?
 
-    private func stamp() -> String {
-        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"
-        return "qrinajar-" + f.string(from: Date())
-    }
-
-    private func exportURL(ext: String, data: Data) -> URL? {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(stamp()).\(ext)")
-        do { try data.write(to: url); return url } catch { return nil }
-    }
-
     var body: some View {
         VStack(spacing: 20) {
             GroupCard {
                 PanelHeader(title: "Share & save", systemImage: "square.and.arrow.up")
-
-                HStack(spacing: 12) {
-                    if let d = QRCardRenderer.pngData(design.snapshot), let url = exportURL(ext: "png", data: d) {
-                        ShareLink(item: url) { exportLabel("PNG", "photo") }
-                    }
-                    if let d = QRCardRenderer.jpegData(design.snapshot), let url = exportURL(ext: "jpg", data: d) {
-                        ShareLink(item: url) { exportLabel("JPEG", "photo.on.rectangle") }
-                    }
-                    if let s = QRCardRenderer.svgString(design.snapshot),
-                       let url = exportURL(ext: "svg", data: Data(s.utf8)) {
-                        ShareLink(item: url) { exportLabel("SVG", "curlybraces") }
-                    }
-                }
 
                 HStack(spacing: 12) {
                     Button {
@@ -64,12 +41,12 @@ struct ExportPanel: View {
     }
 
     private func exportLabel(_ text: String, _ symbol: String) -> some View {
-        VStack(spacing: 4) {
-            Image(systemName: symbol).font(.title3)
-            Text(text).font(.caption2)
+        VStack(spacing: 8) {
+            Image(systemName: symbol).font(.system(size: 34))
+            Text(text).font(.subheadline.weight(.medium))
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 8)
+        .padding(.vertical, 20)
     }
 
     @ViewBuilder
