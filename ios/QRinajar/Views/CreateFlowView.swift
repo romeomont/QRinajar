@@ -53,6 +53,7 @@ private struct FlowStepView: View {
     @State private var showLibrary = false
     @State private var shareItem: ShareItem?
     @State private var showFinishOptions = false
+    @State private var showStartAnotherAlert = false
     @State private var showSaveAlert = false
     @State private var saveName = ""
 
@@ -108,8 +109,7 @@ private struct FlowStepView: View {
                         }
                     case .export:
                         Button {
-                            design.apply(.factory)
-                            path = []
+                            showStartAnotherAlert = true
                         } label: {
                             VStack(spacing: 10) {
                                 Image(systemName: "plus.circle.fill")
@@ -122,6 +122,15 @@ private struct FlowStepView: View {
                             .padding(.vertical, 24)
                         }
                         .buttonStyle(.plain)
+                        .alert("Discard this design?", isPresented: $showStartAnotherAlert) {
+                            Button("Discard", role: .destructive) {
+                                design.apply(.factory)
+                                path = []
+                            }
+                            Button("Cancel", role: .cancel) {}
+                        } message: {
+                            Text("Starting another QR code will clear what you have now. Save it first if you want to keep it.")
+                        }
                     }
                 }
                 .padding()
