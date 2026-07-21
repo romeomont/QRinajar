@@ -155,6 +155,12 @@ struct RecoveryVisual: View {
         min(percent * 2.2, 0.62)
     }
 
+    // A gentle continuous breathing pulse on the patch, plus a quick bump
+    // whenever the level changes — just enough motion to draw the eye to
+    // what the patch means without being distracting.
+    @State private var pulse = false
+    @State private var bump = false
+
     var body: some View {
         HStack(spacing: 12) {
             ZStack(alignment: .bottomTrailing) {
@@ -189,10 +195,27 @@ struct RecoveryVisual: View {
                     }
                     .frame(width: side, height: side)
                     .position(x: geo.size.width - side / 2, y: geo.size.height - side / 2)
+                    .scaleEffect(pulse ? 1.08 : 1, anchor: .bottomTrailing)
                 }
             }
             .frame(width: 64, height: 64)
             .background(RoundedRectangle(cornerRadius: 8).fill(.white))
+            .scaleEffect(bump ? 1.06 : 1)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
+                    pulse = true
+                }
+            }
+            .onChange(of: percent) {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.4)) {
+                    bump = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        bump = false
+                    }
+                }
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Still scans even with part missing or obscured")

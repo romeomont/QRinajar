@@ -1,6 +1,6 @@
 # Handoff: iOS app status
 
-Last updated: 2026-07-19. Everything described here is merged into `master`
+Last updated: 2026-07-20. Everything described here is merged into `master`
 and pushed to `origin/master` — there is no outstanding worktree or branch
 to reconcile. `git log --oneline -20` from repo root will show the recent
 history if you want the blow-by-blow.
@@ -33,20 +33,25 @@ The app is **one linear flow**, not a tab bar:
    (compared against a snapshot captured on `.onAppear`) prompts to save,
    discard, or keep editing before the pop is allowed to complete.
 4. **Share** (`.export`) — title is literally "Share" (`FlowStep.title`),
-   not "Save & export"/"Save & Share" as in earlier iterations. The step's
-   scrollable content is now just the pinned QR preview; there's no
-   in-page card or button anymore. The footer's floating pill (labeled
-   "SHARE") directly opens the **native iOS share sheet**
+   not "Save & export"/"Save & Share" as in earlier iterations. The
+   footer's floating pill (labeled "FINISH") opens a
+   `.confirmationDialog` with Save and Share options: Save auto-names the
+   design (`defaultName()`), stores it via `PresetStore.save`, and opens
+   the Library so the result is visible immediately; Share builds a
+   `ShareItem` and presents the **native iOS share sheet**
    (`UIActivityViewController` via `ActivityShareSheet` in
    `Views/ExportView.swift`) — its built-in Copy/Save Image/AirDrop/Print
    actions replaced a custom Copy/Save/Share picker that used to live
-   here, on the reasoning that duplicating what the system sheet already
-   offers wasn't worth maintaining. `ShareItem` (the `Identifiable` image
-   wrapper) and `ActivityShareSheet` are both `internal`, not `private`,
-   specifically so `LibraryView`'s QR popup can reuse them too. The
-   PNG/JPEG/SVG ShareLink row and the in-app "scan self-test" button were
-   both removed further back — ask before re-adding either without
-   reading the "known issues" section below.
+   here. `ShareItem` (the `Identifiable` image wrapper) and
+   `ActivityShareSheet` are both `internal`, not `private`, specifically
+   so `LibraryView`'s QR popup can reuse them too. Below the preview, a
+   large "Start Another" button (`plus.circle.fill`) resets `design` to
+   `.factory` and pops `path` back to the first step — it always confirms
+   first via an alert (`showStartAnotherAlert`) since it's destructive to
+   whatever's on screen and unsaved. The PNG/JPEG/SVG ShareLink row and
+   the in-app "scan self-test" button were both removed further back —
+   ask before re-adding either without reading the "known issues" section
+   below.
 
 The footer CTA (Next / Share) is a floating pill
 (`FloatingPillButtonStyle` in `Views/Controls.swift`) — solid `brandBlue`,
@@ -88,7 +93,11 @@ live preview, filling toward the selected level, plus `RecoveryVisual` — a
 small mock module grid with a blue "damage patch" sized (and exaggerated
 ~2.2x for legibility) to that level's real recovery percentage. Copy is
 deliberately framed around what can be *missing, dirty, or covered by a
-logo*, not abstract "tolerance."
+logo*, not abstract "tolerance." The patch has a continuous gentle
+breathing pulse (`pulse` state, `repeatForever` scale animation) plus a
+quick bump (`bump` state) whenever the selected level changes
+(`.onChange(of: percent)`), so the illustration draws the eye rather than
+sitting static.
 
 ### Library (`Views/LibraryView.swift`)
 
@@ -97,34 +106,56 @@ custom-drawn `LibraryRow` because the native API can't be driven
 programmatically (needed for the first-time swipe demo) and can't do a
 full swipe-through delete with velocity:
 
-- No inline delete button and no trailing chevron — a preset row shows
-  name/date, a QR icon (opens `QRPopupCard`), and that's it.
-- Swiping reveals a red backing (opacity gated by `revealAmount`, zero at
-  rest — it never bleeds outside the reveal) via `simultaneousGesture`
-  (not `.gesture`) so the drag isn't delayed behind the row's own tap
-  recognizer. Dragging past half the row's own width (`rowWidth * 0.5`,
-  captured via a `GeometryReader` background), or a fast enough flick
-  (`predictedEndTranslation`), commits to immediate deletion — no
-  confirmation alert.
-- **Shake to undo**: `Views/ShakeDetector.swift` bridges UIKit's
-  `motionEnded`/`.motionShake` (there's no SwiftUI shake gesture) to a
-  `NotificationCenter` post and a `View.onShake { }` modifier.
+- No inline delete/rename buttons and no trailing chevron — a preset row
+  shows name/date and a QR icon (opens `QRPopupCard`). Left swipe reveals
+  delete (red); right swipe reveals rename (blue, `pencil` icon), which
+  opens a `.alert` with a `TextField` wired to `PresetStore.rename`.
+  Both reveals share the same underlying mechanics via a signed `offset`.
+- Swiping reveals a backing whose opacity is gated by `revealAmount` /
+  `editRevealAmount` (zero at rest — it never bleeds outside the reveal)
+  via `simultaneousGesture` (not `.gesture`) so the drag isn't delayed
+  behind the row's own tap recognizer. Dragging past half the row's own
+  width (`rowWidth * 0.5`, captured via a `GeometryReader` background),
+  or a fast enough flick (`predictedEndTranslation`), commits immediately
+  — delete with no confirmation alert, rename by opening the rename
+  alert directly. A drag that stops short of that threshold snaps to
+  whichever state (open/closed) it's numerically closer to, computed
+  from the row's *absolute* position (`dragStartOffset + translation`,
+  captured once per gesture via an `isDragging` flag) rather than the raw
+  per-gesture translation — the earlier version recomputed from zero on
+  every new drag, so a second half-hearted tug on an already-open row
+  could snap it shut even though nothing was actually being undone. A
+  revealed row now only closes via an explicit tap on the row (treated
+  as "tapping off" it, handled in `handleContentTap`) or by dragging it
+  back — never automatically.
+- **Shake to undo** (delete only): `Views/ShakeDetector.swift` bridges
+  UIKit's `motionEnded`/`.motionShake` (there's no SwiftUI shake gesture)
+  to a `NotificationCenter` post and a `View.onShake { }` modifier.
   `LibraryView` keeps the last-deleted preset + its original index for 8
   seconds (`DispatchWorkItem`, cancelled/replaced on each new delete) and
   restores it via `PresetStore.restore(_:at:)` on shake.
   `PresetStore.restore` (added alongside `save`/`delete`) re-inserts at a
   clamped index rather than always prepending, so undo puts a row back
   where it was.
-- First row plays a one-time scripted peek-and-return
-  (`AppStorage("hasSeenLibrarySwipeDemo")`) ~0.5s after the library
-  appears, so the swipe gesture isn't hidden from first-time users.
+- Only the first row plays a scripted peek-and-return demo — delete
+  first, then rename — a short time after the Library appears, up to 3
+  separate visits (`AppStorage("librarySwipeDemoCount")`). After the 3rd,
+  an alert asks once whether to keep showing it or turn it off
+  (`AppStorage("librarySwipeDemosDisabled")`,
+  `AppStorage("librarySwipeDemoAsked")`) — choosing "Keep Showing" lifts
+  the 3-visit cap indefinitely, "Turn Off" disables the demo for good.
 - Tapping a row's QR icon opens `QRPopupCard` — a bottom-anchored card
   over a dimmed scrim, flush against the bottom safe area (top corners
   only rounded via `.rect(topLeadingRadius:topTrailingRadius:)`), with its
   own Share button. Tapping the scrim dismisses it.
+- The Library's own `.sheet` presentation has `.interactiveDismissDisabled()`
+  set (in `CreateFlowView`) — without it, a diagonal or imprecise row
+  swipe could get partly read by iOS as a downward drag-to-dismiss on the
+  sheet itself, closing the whole Library. The toolbar X button is the
+  only way to dismiss it now.
 - "Save current design" and "Reset to factory" were removed from the
-  Library menu — saving now only happens from the Export step's
-  "Save for later" pill.
+  Library menu — saving now only happens from the Share step's FINISH
+  dialog.
 
 ## Known issues / deliberately untested paths
 

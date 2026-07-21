@@ -180,7 +180,11 @@ private struct FlowStepView: View {
             }
         }
         .sheet(isPresented: $showLibrary) {
+            // Interactive dismiss disabled — its own downward-drag gesture
+            // otherwise fights with row swipe-to-delete, closing the whole
+            // sheet on an imprecise or diagonal swipe.
             LibraryView()
+                .interactiveDismissDisabled()
         }
         .onAppear {
             if step == .style {

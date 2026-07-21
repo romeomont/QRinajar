@@ -5,7 +5,14 @@ struct LibraryView: View {
     @Environment(PresetStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var popupPreset: SavedPreset?
-    @AppStorage("hasSeenLibrarySwipeDemo") private var hasSeenSwipeDemo = false
+
+    // Only the first row demos its swipe (delete, then rename), once per
+    // time the Library is opened; after a handful of visits, ask once
+    // whether to keep showing it rather than silently demoing forever.
+    @AppStorage("librarySwipeDemoCount") private var demoCount = 0
+    @AppStorage("librarySwipeDemosDisabled") private var demosDisabled = false
+    @AppStorage("librarySwipeDemoAsked") private var hasAskedToStopDemos = false
+    @State private var showStopDemoPrompt = false
 
     // Swipe-to-delete removes immediately (no confirmation prompt) — the
     // safety net is shaking the device to undo, matching Mail/Notes.
@@ -24,7 +31,7 @@ struct LibraryView: View {
                         ForEach(Array(store.presets.enumerated()), id: \.element.id) { index, preset in
                             LibraryRow(
                                 preset: preset,
-                                playDemo: index == 0 && !hasSeenSwipeDemo,
+                                playDemo: index == 0 && !demosDisabled && (demoCount < 3 || hasAskedToStopDemos),
                                 onOpen: {
                                     design.apply(preset.design)
                                     dismiss()
@@ -35,7 +42,12 @@ struct LibraryView: View {
                                     }
                                 },
                                 onDelete: { performDelete(preset, at: index) },
-                                onDemoFinished: { hasSeenSwipeDemo = true },
+                                onDemoFinished: {
+                                    demoCount += 1
+                                    if demoCount >= 3 && !hasAskedToStopDemos {
+                                        showStopDemoPrompt = true
+                                    }
+                                },
                                 onRename: { newName in store.rename(preset, to: newName) }
                             )
                         }
@@ -59,6 +71,17 @@ struct LibraryView: View {
                 }
             }
             .onShake { undoLastDelete() }
+            .alert("Turn off these swipe tips?", isPresented: $showStopDemoPrompt) {
+                Button("Turn Off") {
+                    demosDisabled = true
+                    hasAskedToStopDemos = true
+                }
+                Button("Keep Showing") {
+                    hasAskedToStopDemos = true
+                }
+            } message: {
+                Text("You've seen a few — want to stop showing the swipe demos?")
+            }
 
             if let preset = popupPreset {
                 QRPopupCard(preset: preset) {
@@ -105,52 +128,89 @@ private struct LibraryRow: View {
     let onRename: (String) -> Void
 
     @State private var offset: CGFloat = 0
+    // Where the row sat when the current drag began — lets a second drag on
+    // an already-open row (e.g. reaching for full-swipe-delete, then
+    // changing your mind) continue from there instead of being computed
+    // from zero, which could snap the row shut even though nothing was
+    // actually undone.
+    @State private var dragStartOffset: CGFloat = 0
+    @State private var isDragging = false
     @State private var rowWidth: CGFloat = 360
     private let deleteWidth: CGFloat = 84
+    private let editWidth: CGFloat = 84
     private let rowHeight: CGFloat = 76
 
-    // A normal tap still opens the preset, but it's held for a moment in
-    // case a second tap follows — retapping within that window means
-    // "rename this," not "open this," so the pencil appears instead.
-    @State private var lastTapDate: Date?
-    @State private var pendingOpenWork: DispatchWorkItem?
-    @State private var showRenameIcon = false
     @State private var showRenameAlert = false
     @State private var renameText = ""
-    private let rapidTapWindow: TimeInterval = 2
 
     // Only visible once the row has actually started sliding — at rest
     // there's no red anywhere, revealed only as the user (or the demo)
     // drags the content away from it.
     private var revealAmount: CGFloat {
-        min(-offset / deleteWidth, 1)
+        max(min(-offset / deleteWidth, 1), 0)
     }
 
-    // Dragging past half the row's own width — not just past the delete
-    // button — commits to a full swipe-through delete, Mail-style.
+    // Same idea for the leading-edge rename reveal, swiped the other way.
+    private var editRevealAmount: CGFloat {
+        max(min(offset / editWidth, 1), 0)
+    }
+
+    // Dragging past half the row's own width — not just past the reveal
+    // button — commits to a full swipe-through action, Mail-style, on
+    // either side.
     private var deleteThroughThreshold: CGFloat { rowWidth * 0.5 }
+    private var editThroughThreshold: CGFloat { rowWidth * 0.5 }
 
     var body: some View {
-        ZStack(alignment: .trailing) {
-            // Grows to fill exactly the gap the content has slid open, so a
-            // full swipe-through reads as one continuous red sheet rather
-            // than a fixed-width button trailing off into empty space.
-            Color.red
-                .frame(width: max(-offset, 0), height: rowHeight)
-            HStack(spacing: 4) {
-                Image(systemName: "trash.fill")
-                Text("Delete").font(.caption2)
+        ZStack {
+            HStack {
+                // Grows to fill exactly the gap the content has slid open,
+                // same as the delete side, so a full swipe-through reads as
+                // one continuous blue sheet.
+                ZStack(alignment: .leading) {
+                    brandBlue
+                        .frame(width: max(offset, 0), height: rowHeight)
+                    HStack(spacing: 4) {
+                        Image(systemName: "pencil")
+                        Text("Rename").font(.caption2)
+                    }
+                    .foregroundStyle(.white)
+                    .frame(width: editWidth, height: rowHeight)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeOut(duration: 0.2)) { offset = 0 }
+                        renameText = preset.name
+                        showRenameAlert = true
+                    }
+                    .opacity(editRevealAmount)
+                }
+                Spacer()
             }
-            .foregroundStyle(.white)
-            .frame(width: deleteWidth, height: rowHeight)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                withAnimation(.easeOut(duration: 0.2)) { offset = 0 }
-                onDelete()
-            }
-            .opacity(revealAmount)
 
-            Button(action: handleTap) {
+            HStack {
+                Spacer()
+                // Grows to fill exactly the gap the content has slid open, so a
+                // full swipe-through reads as one continuous red sheet rather
+                // than a fixed-width button trailing off into empty space.
+                ZStack(alignment: .trailing) {
+                    Color.red
+                        .frame(width: max(-offset, 0), height: rowHeight)
+                    HStack(spacing: 4) {
+                        Image(systemName: "trash.fill")
+                        Text("Delete").font(.caption2)
+                    }
+                    .foregroundStyle(.white)
+                    .frame(width: deleteWidth, height: rowHeight)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation(.easeOut(duration: 0.2)) { offset = 0 }
+                        onDelete()
+                    }
+                    .opacity(revealAmount)
+                }
+            }
+
+            Button(action: handleContentTap) {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(preset.name).font(.title3.weight(.semibold)).foregroundStyle(.primary)
@@ -158,19 +218,6 @@ private struct LibraryRow: View {
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
                     Spacer()
-                    if showRenameIcon {
-                        Button {
-                            renameText = preset.name
-                            showRenameAlert = true
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(brandBlue)
-                                .frame(width: 44, height: 44)
-                        }
-                        .buttonStyle(.plain)
-                        .transition(.scale.combined(with: .opacity))
-                    }
                     Button(action: onShowQR) {
                         Image(systemName: "qrcode")
                             .font(.title2)
@@ -192,16 +239,50 @@ private struct LibraryRow: View {
             .simultaneousGesture(
                 DragGesture()
                     .onChanged { value in
-                        guard value.translation.width < 0 else { offset = 0; return }
-                        offset = max(value.translation.width, -rowWidth)
+                        if !isDragging {
+                            isDragging = true
+                            dragStartOffset = offset
+                        }
+                        let proposed = dragStartOffset + value.translation.width
+                        offset = min(max(proposed, -rowWidth), rowWidth)
                     }
                     .onEnded { value in
-                        let translation = value.translation.width
+                        let proposed = dragStartOffset + value.translation.width
+                        isDragging = false
+
+                        if proposed >= 0 {
+                            // A fast rightward fling commits to rename
+                            // immediately, even short of the halfway point —
+                            // same full-swipe-through affordance as delete.
+                            let predictedEndRight = dragStartOffset + value.predictedEndTranslation.width
+                            let flungPastRight = predictedEndRight > editThroughThreshold
+                            if proposed > editThroughThreshold || flungPastRight {
+                                withAnimation(.easeIn(duration: 0.22)) {
+                                    offset = rowWidth + 60
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                    renameText = preset.name
+                                    showRenameAlert = true
+                                    offset = 0
+                                }
+                                return
+                            }
+                            // Otherwise a deliberate rightward swipe reveals
+                            // and stays open; it only closes again if the
+                            // user taps the row or swipes it back — never on
+                            // its own.
+                            let shouldReveal = proposed > editWidth / 2
+                            withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                                offset = shouldReveal ? editWidth : 0
+                            }
+                            return
+                        }
                         // A fast leftward fling commits even if it hasn't
                         // physically crossed the halfway point yet — the
                         // predicted end point stands in for velocity.
-                        let flungPast = value.predictedEndTranslation.width < -deleteThroughThreshold
-                        if translation < -deleteThroughThreshold || flungPast {
+                        let predictedEnd = dragStartOffset + value.predictedEndTranslation.width
+                        let flungPast = predictedEnd < -deleteThroughThreshold
+                        if proposed < -deleteThroughThreshold || flungPast {
                             withAnimation(.easeIn(duration: 0.22)) {
                                 offset = -rowWidth - 60
                             }
@@ -209,7 +290,11 @@ private struct LibraryRow: View {
                                 onDelete()
                             }
                         } else {
-                            let shouldReveal = translation < -deleteWidth / 2
+                            // Was it dragged closer to open, or closer to
+                            // closed? Whichever it ends nearer to is where
+                            // it lands — a small further tug on an
+                            // already-open row shouldn't dismiss it.
+                            let shouldReveal = proposed < -deleteWidth / 2
                             withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
                                 offset = shouldReveal ? -deleteWidth : 0
                             }
@@ -227,8 +312,9 @@ private struct LibraryRow: View {
         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
         .onAppear {
             guard playDemo else { return }
-            // A short peek-and-return so a first-time user discovers the
-            // swipe-to-delete gesture without having to be told.
+            // A short peek-and-return on each side so a first-time user
+            // discovers both swipe-to-delete and swipe-to-rename without
+            // having to be told — delete first, then rename.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
                     offset = -deleteWidth
@@ -237,7 +323,17 @@ private struct LibraryRow: View {
                     withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                         offset = 0
                     }
-                    onDemoFinished()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                        withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                            offset = editWidth
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                offset = 0
+                            }
+                            onDemoFinished()
+                        }
+                    }
                 }
             }
         }
@@ -248,24 +344,14 @@ private struct LibraryRow: View {
         }
     }
 
-    private func handleTap() {
-        let now = Date()
-        if let last = lastTapDate, now.timeIntervalSince(last) < rapidTapWindow {
-            // Second tap arrived in time — this is a rename request, not
-            // an open request, so cancel the pending open entirely.
-            pendingOpenWork?.cancel()
-            lastTapDate = nil
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                showRenameIcon = true
-            }
+    // While a reveal is open, tapping the row content is "tapping off" it —
+    // it closes the reveal rather than opening the preset.
+    private func handleContentTap() {
+        guard offset == 0 else {
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) { offset = 0 }
             return
         }
-        lastTapDate = now
-        // Hold the open action just long enough for a second tap to
-        // preempt it; if none comes, it fires on its own.
-        let work = DispatchWorkItem { onOpen() }
-        pendingOpenWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + rapidTapWindow, execute: work)
+        onOpen()
     }
 }
 
