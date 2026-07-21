@@ -11,7 +11,7 @@ enum FlowStep: Int, CaseIterable, Hashable {
         case .type: return "What are you sharing?"
         case .data: return "Enter the details"
         case .style: return "Style it"
-        case .export: return "Save & export"
+        case .export: return "Share"
         }
     }
 }
@@ -51,6 +51,7 @@ private struct FlowStepView: View {
     @Environment(\.colorScheme) private var colorScheme
     @AppColorSchemeStorage private var appearance
     @State private var showLibrary = false
+    @State private var shareItem: ShareItem?
     @State private var showSaveAlert = false
     @State private var saveName = ""
 
@@ -105,7 +106,7 @@ private struct FlowStepView: View {
                             StyleCustomPanels()
                         }
                     case .export:
-                        ExportPanel()
+                        EmptyView()
                     }
                 }
                 .padding()
@@ -126,6 +127,9 @@ private struct FlowStepView: View {
             ScannerButton()
                 .padding(.trailing, 16)
                 .padding(.bottom, step == .type ? 20 : 88)
+        }
+        .sheet(item: $shareItem) { item in
+            ActivityShareSheet(activityItems: [item.image])
         }
         .navigationTitle(step.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -195,10 +199,14 @@ private struct FlowStepView: View {
         Group {
             if step == .export {
                 Button {
-                    saveName = defaultName()
-                    showSaveAlert = true
+                    // The native share sheet already offers Save Image,
+                    // Copy, AirDrop, etc. as built-in actions, so there's
+                    // no need for a custom Copy/Save/Share picker here.
+                    if let ui = QRCardRenderer.composeImage(design.snapshot, opaque: false) {
+                        shareItem = ShareItem(image: ui)
+                    }
                 } label: {
-                    Text("SAVE FOR LATER")
+                    Text("SHARE")
                         .font(.headline.weight(.bold))
                 }
                 .buttonStyle(FloatingPillButtonStyle())

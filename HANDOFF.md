@@ -32,19 +32,30 @@ The app is **one linear flow**, not a tab bar:
    not by QRDesign itself). Backing out of this step with unsaved changes
    (compared against a snapshot captured on `.onAppear`) prompts to save,
    discard, or keep editing before the pop is allowed to complete.
-4. **Save & export** (`.export`) — `Views/ExportView.swift`. Three
-   actions, in this order: **Copy**, **Save** (to Photos), **Share**
-   (native `UIActivityViewController` via `ActivityShareSheet`, which
-   `LibraryView`'s QR popup also reuses — it's `internal`, not `private`,
-   specifically so it can be shared across files). Share is the visually
-   prominent one. The PNG/JPEG/SVG ShareLink row and the in-app
-   "scan self-test" button were both removed a while back — ask before
-   re-adding either without reading the "known issues" section below.
+4. **Share** (`.export`) — title is literally "Share" (`FlowStep.title`),
+   not "Save & export"/"Save & Share" as in earlier iterations. The step's
+   scrollable content is now just the pinned QR preview; there's no
+   in-page card or button anymore. The footer's floating pill (labeled
+   "SHARE") directly opens the **native iOS share sheet**
+   (`UIActivityViewController` via `ActivityShareSheet` in
+   `Views/ExportView.swift`) — its built-in Copy/Save Image/AirDrop/Print
+   actions replaced a custom Copy/Save/Share picker that used to live
+   here, on the reasoning that duplicating what the system sheet already
+   offers wasn't worth maintaining. `ShareItem` (the `Identifiable` image
+   wrapper) and `ActivityShareSheet` are both `internal`, not `private`,
+   specifically so `LibraryView`'s QR popup can reuse them too. The
+   PNG/JPEG/SVG ShareLink row and the in-app "scan self-test" button were
+   both removed further back — ask before re-adding either without
+   reading the "known issues" section below.
 
-The footer CTA (Next / Save for later) is a floating pill
+The footer CTA (Next / Share) is a floating pill
 (`FloatingPillButtonStyle` in `Views/Controls.swift`) — solid `brandBlue`,
 16pt corner radius (matches the Style step's preset cards), soft glow
-shadow, inset from the screen edges rather than a full-bleed bar.
+shadow, inset from the screen edges rather than a full-bleed bar. Saving
+the current design to the Library now only happens from the "Unsaved
+style changes" prompt when backing out of the Style step with unsaved
+edits — there's no standalone "save to library" affordance on the Share
+step anymore.
 
 All four steps are pushed onto a real `NavigationStack` (see
 `CreateFlowView.body`, `path: [FlowStep]`), not swapped via `@State` in
