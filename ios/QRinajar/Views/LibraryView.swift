@@ -6,13 +6,16 @@ struct LibraryView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var popupPreset: SavedPreset?
 
-    // Only the first row demos its swipe (delete, then rename), once per
-    // time the Library is opened; after a handful of visits, ask once
-    // whether to keep showing it rather than silently demoing forever.
-    @AppStorage("librarySwipeDemoCount") private var demoCount = 0
-    @AppStorage("librarySwipeDemosDisabled") private var demosDisabled = false
-    @AppStorage("librarySwipeDemoAsked") private var hasAskedToStopDemos = false
-    @State private var showStopDemoPrompt = false
+    // Only the first row demos its swipe (delete, then rename) — guaranteed
+    // the very first time the Library is ever opened, then only as an
+    // occasional reminder rather than every visit, so it doesn't pester
+    // returning users.
+    @AppStorage("librarySwipeDemoLastShown") private var lastDemoShown: Double = 0
+    private let demoReminderInterval: TimeInterval = 14 * 24 * 60 * 60
+
+    private var shouldPlayDemo: Bool {
+        lastDemoShown == 0 || Date().timeIntervalSince1970 - lastDemoShown > demoReminderInterval
+    }
 
     // Swipe-to-delete removes immediately (no confirmation prompt) — the
     // safety net is shaking the device to undo, matching Mail/Notes.
@@ -31,7 +34,7 @@ struct LibraryView: View {
                         ForEach(Array(store.presets.enumerated()), id: \.element.id) { index, preset in
                             LibraryRow(
                                 preset: preset,
-                                playDemo: index == 0 && !demosDisabled && (demoCount < 3 || hasAskedToStopDemos),
+                                playDemo: index == 0 && shouldPlayDemo,
                                 onOpen: {
                                     design.apply(preset.design)
                                     dismiss()
@@ -43,18 +46,13 @@ struct LibraryView: View {
                                 },
                                 onDelete: { performDelete(preset, at: index) },
                                 onDemoFinished: {
-                                    demoCount += 1
-                                    if demoCount >= 3 && !hasAskedToStopDemos {
-                                        showStopDemoPrompt = true
-                                    }
+                                    lastDemoShown = Date().timeIntervalSince1970
                                 },
                                 onRename: { newName in store.rename(preset, to: newName) }
                             )
                         }
                     } header: {
                         Text("Saved presets")
-                    } footer: {
-                        Text("Swipe a preset to delete it — shake to undo.")
                     }
                 }
             }
@@ -62,26 +60,17 @@ struct LibraryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
+                    // No GlassButtonStyle here — toolbar items already get
+                    // Liquid Glass automatically; adding it again stacked a
+                    // second glass shape behind the icon.
                     Button {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark")
                     }
-                    .modifier(GlassButtonStyle())
                 }
             }
             .onShake { undoLastDelete() }
-            .alert("Turn off these swipe tips?", isPresented: $showStopDemoPrompt) {
-                Button("Turn Off") {
-                    demosDisabled = true
-                    hasAskedToStopDemos = true
-                }
-                Button("Keep Showing") {
-                    hasAskedToStopDemos = true
-                }
-            } message: {
-                Text("You've seen a few — want to stop showing the swipe demos?")
-            }
 
             if let preset = popupPreset {
                 QRPopupCard(preset: preset) {
@@ -226,6 +215,7 @@ private struct LibraryRow: View {
                     }
                     .buttonStyle(.plain)
                 }
+                .padding(.horizontal, 16)
                 .frame(height: rowHeight)
                 .contentShape(Rectangle())
             }
@@ -277,12 +267,16 @@ private struct LibraryRow: View {
                             }
                             return
                         }
-                        // A fast leftward fling commits even if it hasn't
-                        // physically crossed the halfway point yet — the
-                        // predicted end point stands in for velocity.
+                        // Deletion only commits on a genuinely completed
+                        // swipe — dragged (or carried by inertia) almost the
+                        // entire width of the row. predictedEndTranslation
+                        // folds in velocity, so a fast flick that hasn't
+                        // physically reached the edge yet still counts, but
+                        // a slow drag that merely crosses the reveal
+                        // threshold and stops does not.
+                        let fullSwipeThreshold = rowWidth * 0.85
                         let predictedEnd = dragStartOffset + value.predictedEndTranslation.width
-                        let flungPast = predictedEnd < -deleteThroughThreshold
-                        if proposed < -deleteThroughThreshold || flungPast {
+                        if predictedEnd < -fullSwipeThreshold {
                             withAnimation(.easeIn(duration: 0.22)) {
                                 offset = -rowWidth - 60
                             }
@@ -309,7 +303,10 @@ private struct LibraryRow: View {
             }
         }
         .clipped()
-        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+        // No horizontal inset — the delete/rename color reaches the true
+        // edges of the row (Mail-style); the row's own text content gets
+        // its margin from padding inside the row instead.
+        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
         .onAppear {
             guard playDemo else { return }
             // A short peek-and-return on each side so a first-time user

@@ -1,6 +1,6 @@
 # Handoff: iOS app status
 
-Last updated: 2026-07-20. Everything described here is merged into `master`
+Last updated: 2026-07-20 (evening). Everything described here is merged into `master`
 and pushed to `origin/master` — there is no outstanding worktree or branch
 to reconcile. `git log --oneline -20` from repo root will show the recent
 history if you want the blow-by-blow.
@@ -35,10 +35,13 @@ The app is **one linear flow**, not a tab bar:
 4. **Share** (`.export`) — title is literally "Share" (`FlowStep.title`),
    not "Save & export"/"Save & Share" as in earlier iterations. The
    footer's floating pill (labeled "FINISH") opens a
-   `.confirmationDialog` with Save and Share options: Save auto-names the
-   design (`defaultName()`), stores it via `PresetStore.save`, and opens
-   the Library so the result is visible immediately; Share builds a
-   `ShareItem` and presents the **native iOS share sheet**
+   `.confirmationDialog` with Save and Share options: Save opens the same
+   "Save to Library" name-prompt alert used when backing out of Style
+   with unsaved changes (`showSaveAlert`/`saveName`, pre-filled with
+   `defaultName()`), stores it via `PresetStore.save`, and shows a brief
+   "Added to Library" toast (`showSavedToast()`, bottom-center, ~1.8s)
+   instead of jumping to the Library — Share builds a `ShareItem` and
+   presents the **native iOS share sheet**
    (`UIActivityViewController` via `ActivityShareSheet` in
    `Views/ExportView.swift`) — its built-in Copy/Save Image/AirDrop/Print
    actions replaced a custom Copy/Save/Share picker that used to live
@@ -97,7 +100,11 @@ logo*, not abstract "tolerance." The patch has a continuous gentle
 breathing pulse (`pulse` state, `repeatForever` scale animation) plus a
 quick bump (`bump` state) whenever the selected level changes
 (`.onChange(of: percent)`), so the illustration draws the eye rather than
-sitting static.
+sitting static. A `brandBlue` bracket (`LogoBracketShape`, an "⊔"-style
+under-brace) spans the Q and H columns of the thermometer with a "Best
+for logos" label beneath — those are the two levels actually worth
+choosing for a center logo, per the info tip copy; L/M are correct QR
+spec levels too (ISO/IEC 18004), not placeholders.
 
 ### Library (`Views/LibraryView.swift`)
 
@@ -110,24 +117,30 @@ full swipe-through delete with velocity:
   shows name/date and a QR icon (opens `QRPopupCard`). Left swipe reveals
   delete (red); right swipe reveals rename (blue, `pencil` icon), which
   opens a `.alert` with a `TextField` wired to `PresetStore.rename`.
-  Both reveals share the same underlying mechanics via a signed `offset`.
+  Both reveals share the same underlying mechanics via a signed `offset`,
+  and both color backings extend to the true edges of the row —
+  `listRowInsets` is zero, with the row's own text content getting its
+  16pt margin from padding inside the row instead, so the reveal isn't
+  inset from the row's edge the way the old layout had it.
 - Swiping reveals a backing whose opacity is gated by `revealAmount` /
   `editRevealAmount` (zero at rest — it never bleeds outside the reveal)
   via `simultaneousGesture` (not `.gesture`) so the drag isn't delayed
-  behind the row's own tap recognizer. Dragging past half the row's own
-  width (`rowWidth * 0.5`, captured via a `GeometryReader` background),
-  or a fast enough flick (`predictedEndTranslation`), commits immediately
-  — delete with no confirmation alert, rename by opening the rename
-  alert directly. A drag that stops short of that threshold snaps to
-  whichever state (open/closed) it's numerically closer to, computed
-  from the row's *absolute* position (`dragStartOffset + translation`,
-  captured once per gesture via an `isDragging` flag) rather than the raw
-  per-gesture translation — the earlier version recomputed from zero on
-  every new drag, so a second half-hearted tug on an already-open row
-  could snap it shut even though nothing was actually being undone. A
-  revealed row now only closes via an explicit tap on the row (treated
-  as "tapping off" it, handled in `handleContentTap`) or by dragging it
-  back — never automatically.
+  behind the row's own tap recognizer. **Delete only commits on a
+  genuinely completed swipe with inertia** — `predictedEndTranslation`
+  (which folds in velocity) has to carry past 85% of the row's width
+  (`fullSwipeThreshold`); a slow drag that merely crosses the reveal
+  threshold and stops does not delete, it just reveals the button.
+  Rename's full-swipe-through still commits at the halfway point (no
+  inertia requirement) since it isn't destructive. A drag that stops
+  short of committing snaps to whichever state (open/closed) it's
+  numerically closer to, computed from the row's *absolute* position
+  (`dragStartOffset + translation`, captured once per gesture via an
+  `isDragging` flag) rather than the raw per-gesture translation — the
+  earlier version recomputed from zero on every new drag, so a second
+  half-hearted tug on an already-open row could snap it shut even though
+  nothing was actually being undone. A revealed row now only closes via
+  an explicit tap on the row (treated as "tapping off" it, handled in
+  `handleContentTap`) or by dragging it back — never automatically.
 - **Shake to undo** (delete only): `Views/ShakeDetector.swift` bridges
   UIKit's `motionEnded`/`.motionShake` (there's no SwiftUI shake gesture)
   to a `NotificationCenter` post and a `View.onShake { }` modifier.
@@ -138,12 +151,11 @@ full swipe-through delete with velocity:
   clamped index rather than always prepending, so undo puts a row back
   where it was.
 - Only the first row plays a scripted peek-and-return demo — delete
-  first, then rename — a short time after the Library appears, up to 3
-  separate visits (`AppStorage("librarySwipeDemoCount")`). After the 3rd,
-  an alert asks once whether to keep showing it or turn it off
-  (`AppStorage("librarySwipeDemosDisabled")`,
-  `AppStorage("librarySwipeDemoAsked")`) — choosing "Keep Showing" lifts
-  the 3-visit cap indefinitely, "Turn Off" disables the demo for good.
+  first, then rename. It's guaranteed the very first time the Library is
+  ever opened (`AppStorage("librarySwipeDemoLastShown") == 0`), then only
+  reappears as an occasional reminder if 14+ days have passed since it
+  last played — no repeat-visit counter, no "turn off tips?" prompt, just
+  a quiet, infrequent nudge.
 - Tapping a row's QR icon opens `QRPopupCard` — a bottom-anchored card
   over a dimmed scrim, flush against the bottom safe area (top corners
   only rounded via `.rect(topLeadingRadius:topTrailingRadius:)`), with its
@@ -152,10 +164,14 @@ full swipe-through delete with velocity:
   set (in `CreateFlowView`) — without it, a diagonal or imprecise row
   swipe could get partly read by iOS as a downward drag-to-dismiss on the
   sheet itself, closing the whole Library. The toolbar X button is the
-  only way to dismiss it now.
+  only way to dismiss it now — it does **not** have `GlassButtonStyle`
+  applied (that modifier is only for standalone controls; a `ToolbarItem`
+  already gets Liquid Glass automatically, and stacking both drew two
+  overlapping glass shapes).
 - "Save current design" and "Reset to factory" were removed from the
   Library menu — saving now only happens from the Share step's FINISH
-  dialog.
+  dialog, which no longer auto-navigates to the Library on save (see
+  Share step above) — it shows a toast instead.
 
 ## Known issues / deliberately untested paths
 

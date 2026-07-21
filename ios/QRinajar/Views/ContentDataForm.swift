@@ -66,6 +66,19 @@ struct ContentDataForm: View {
     }
 }
 
+// An under-bracket ("⊔") connecting the two ECC options recommended for a
+// logo, drawn beneath the Q and H columns of the thermometer.
+struct LogoBracketShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+        return path
+    }
+}
+
 // A 4-stop thermometer (L/M/Q/H) that lives right under the QR preview so
 // the effect of raising error correction is visible immediately, instead
 // of behind a sheet.
@@ -123,6 +136,29 @@ struct ECCThermometer: View {
                     .buttonStyle(.plain)
                 }
             }
+
+            // Q and H are the two levels worth choosing for a logo — a
+            // bracket spanning just those two columns makes that pairing
+            // legible at a glance rather than buried in the info tip text.
+            GeometryReader { geo in
+                let spacing: CGFloat = 6
+                let count = CGFloat(levels.count)
+                let segmentWidth = (geo.size.width - spacing * (count - 1)) / count
+                let bracketWidth = segmentWidth * 2 + spacing
+                let bracketX = (segmentWidth + spacing) * 2
+
+                VStack(spacing: 2) {
+                    LogoBracketShape()
+                        .stroke(brandBlue, style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
+                        .frame(width: bracketWidth, height: 6)
+                    Text("Best for logos")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(brandBlue)
+                }
+                .frame(width: bracketWidth)
+                .position(x: bracketX + bracketWidth / 2, y: geo.size.height / 2)
+            }
+            .frame(height: 26)
 
             RecoveryVisual(percent: percents[selectedIndex])
                 .padding(.top, 4)

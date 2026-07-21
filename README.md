@@ -74,32 +74,37 @@ unsaved changes prompts to save or discard first.
 Other things worth knowing:
 
 - **Share step** - the last step's FINISH button opens a native
-  Save/Share choice: Save auto-names the design, adds it to the Library,
-  and opens it there; Share opens the native iOS share sheet. Below that,
-  a "Start Another" button resets to a blank design and returns to step
-  one - it always asks to confirm first, since it discards the current
-  design.
+  Save/Share choice: Save prompts for a name (pre-filled with a default),
+  adds it to the Library, and shows a brief "Added to Library" toast
+  instead of jumping there; Share opens the native iOS share sheet.
+  Below that, a "Start Another" button resets to a blank design and
+  returns to step one - it always asks to confirm first, since it
+  discards the current design.
 - **Library** - saved presets (reachable from any step via the toolbar);
   tap a row to load it and return to editing, or tap its QR icon for a
   quick full-preview in a bottom popup card (share it straight from
-  there, or tap outside to dismiss). Swipe a row left to delete it - a
-  full swipe-through (or a fast flick) deletes immediately, no
-  confirmation prompt; shake the device to undo. Swipe a row right to
-  rename it - reveals a blue pencil button, or a full swipe-through/fast
-  flick to the right opens the rename prompt immediately. A swipe that's
-  only partly completed stays open rather than snapping shut on its own;
-  it only closes if you tap the row or swipe it back. The first row
-  demos both gestures (delete, then rename) the first few times the
-  Library is opened, then asks once whether to keep showing the demo or
-  turn it off.
+  there, or tap outside to dismiss). Swipe a row left to delete it - only
+  a full swipe-through with real inertia (a fast flick) deletes; a slow
+  drag that merely crosses the halfway point just reveals the Delete
+  button (tap it to confirm) rather than deleting outright, no
+  confirmation alert either way; shake the device to undo. Swipe a row
+  right to rename it - reveals a blue pencil button, or a full
+  swipe-through/fast flick to the right opens the rename prompt
+  immediately. Both reveals span the full width of the row, edge to edge.
+  A swipe that's only partly completed stays open rather than snapping
+  shut on its own; it only closes if you tap the row or swipe it back.
+  The first row demos both gestures (delete, then rename) the very first
+  time the Library is ever opened, then only resurfaces occasionally
+  (after a couple of weeks) as a quiet reminder, not on every visit.
 - **Style step** - only the Square/Rounded/Custom preset picker shows by
   default; the full set of fine-tune panels (module style, eyes,
   background, logo, border/caption) only appears once Custom is chosen.
 - **Error correction** - an inline L/M/Q/H thermometer under the live
-  preview (not a separate sheet), with a small illustration of roughly
-  how much of the code can be missing, dirty, or covered by a logo at
-  each level and still scan - the illustration pulses gently and bumps
-  when you change levels, to draw the eye to it.
+  preview (not a separate sheet, with a blue bracket calling out that Q
+  and H are the two levels best suited to a center logo), plus a small
+  illustration of roughly how much of the code can be missing, dirty, or
+  covered by a logo at each level and still scan - the illustration
+  pulses gently and bumps when you change levels, to draw the eye to it.
 - **QR scanner** - a floating button on every step opens the camera to scan
   a QR code and open it in Safari; first use explains why the camera
   permission is needed before the system prompt appears, and a success

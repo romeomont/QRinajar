@@ -56,6 +56,8 @@ private struct FlowStepView: View {
     @State private var showStartAnotherAlert = false
     @State private var showSaveAlert = false
     @State private var saveName = ""
+    @State private var showSavedToastFlag = false
+    @State private var savedToastWorkItem: DispatchWorkItem?
 
     // Guards against losing style edits: captured when this step appears,
     // compared against the live design when the user backs out.
@@ -152,6 +154,18 @@ private struct FlowStepView: View {
                 .padding(.trailing, 16)
                 .padding(.bottom, step == .type ? 20 : 88)
         }
+        .overlay(alignment: .bottom) {
+            if showSavedToastFlag {
+                Label("Added to Library", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 12)
+                    .background(.black.opacity(0.85), in: Capsule())
+                    .padding(.bottom, 100)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+        }
         .sheet(item: $shareItem) { item in
             ActivityShareSheet(activityItems: [item.image])
         }
@@ -235,11 +249,12 @@ private struct FlowStepView: View {
                 .buttonStyle(FloatingPillButtonStyle())
                 .confirmationDialog("Finish", isPresented: $showFinishOptions, titleVisibility: .hidden) {
                     Button("Save") {
-                        // Auto-named, no prompt — Finish is meant to be a
-                        // single tap, and the Library shows the result
-                        // immediately after so the user can rename there.
-                        store.save(name: defaultName(), design: design.snapshot)
-                        showLibrary = true
+                        // Prompts for a name via the same "Save to Library"
+                        // alert used when backing out of Style with unsaved
+                        // changes; a brief toast confirms it landed without
+                        // forcing a detour to the Library.
+                        saveName = defaultName()
+                        showSaveAlert = true
                     }
                     Button("Share") {
                         // The native share sheet already offers Save Image,
@@ -270,6 +285,7 @@ private struct FlowStepView: View {
             Button("Save") {
                 let name = saveName.trimmingCharacters(in: .whitespaces)
                 store.save(name: name.isEmpty ? defaultName() : name, design: design.snapshot)
+                showSavedToast()
                 if let target = pendingPopPath {
                     path = target
                     pendingPopPath = nil
@@ -284,6 +300,20 @@ private struct FlowStepView: View {
     private func defaultName() -> String {
         let f = DateFormatter(); f.dateFormat = "MMM d, HH:mm"
         return "Design " + f.string(from: Date())
+    }
+
+    private func showSavedToast() {
+        savedToastWorkItem?.cancel()
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+            showSavedToastFlag = true
+        }
+        let work = DispatchWorkItem {
+            withAnimation(.easeOut(duration: 0.25)) {
+                showSavedToastFlag = false
+            }
+        }
+        savedToastWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.8, execute: work)
     }
 }
 
