@@ -57,6 +57,13 @@ final class PresetStore {
         persist()
     }
 
+    // Re-inserts a swiped-away preset, used by shake-to-undo.
+    func restore(_ preset: SavedPreset, at index: Int) {
+        let clamped = min(max(index, 0), presets.count)
+        presets.insert(preset, at: clamped)
+        persist()
+    }
+
     // Last-design auto-persist (mirrors the web app localStorage boot behaviour).
     func saveLast(_ design: DesignSnapshot) {
         if let data = try? JSONEncoder().encode(design) {

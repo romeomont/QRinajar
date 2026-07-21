@@ -74,19 +74,27 @@ unsaved changes prompts to save or discard first.
 Other things worth knowing:
 
 - **Library** - saved presets (reachable from any step via the toolbar);
-  tap one to load it and return to editing. Swipe left or tap the red ×
-  to delete one, with a confirmation first ("can't be undone"). Also
-  "Save current design" and "Reset to factory".
+  tap a row to load it and return to editing, or tap its QR icon for a
+  quick full-preview in a bottom popup card (share it straight from
+  there, or tap outside to dismiss). Swipe a row to delete it - a full
+  swipe-through (or a fast flick) deletes immediately, no confirmation
+  prompt; shake the device to undo. First-time visitors see a short
+  scripted swipe demo on the first row so the gesture isn't hidden.
 - **Style step** - only the Square/Rounded/Custom preset picker shows by
   default; the full set of fine-tune panels (module style, eyes,
   background, logo, border/caption) only appears once Custom is chosen.
+- **Error correction** - an inline L/M/Q/H thermometer under the live
+  preview (not a separate sheet), with a small illustration of roughly
+  how much of the code can be missing, dirty, or covered by a logo at
+  each level and still scan.
 - **QR scanner** - a floating button on every step opens the camera to scan
   a QR code and open it in Safari; first use explains why the camera
   permission is needed before the system prompt appears, and a success
   haptic confirms a code was found.
-- **Appearance** - Settings (gear icon) lets you force light/dark or follow
-  the system; also asked on first launch, after a splash screen and a
-  one-time welcome screen explaining what the app does.
+- **Appearance** - a single toolbar icon (sun in dark mode, moon in light
+  mode) switches straight to the opposite mode, no settings screen in the
+  way; also asked on first launch, after a splash screen and a one-time
+  welcome screen explaining what the app does.
 - **App icon** - a hand-authored Icon Composer `.icon` bundle
   (`ios/QRinajar/AppIcon.icon/`) rather than a flat PNG, so it renders with
   real specular/translucency on iOS 26 instead of a static image.

@@ -27,10 +27,10 @@
 		B6473A7142DAC0163863293A /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B041FFD1037BD71E88CC4B22 /* RootTabView.swift */; };
 		B8990A8D35064282D557711C /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C4AC0F476EFBDDDB52A23E /* WelcomeView.swift */; };
 		BC8BF343500D1CA781F3AB23 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 7EC935D742CE18CDCC7EFB30 /* AppIcon.icon */; };
-		BE5904185A5867FA8EE0F59B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FE3ED524B58F430F1248833 /* SettingsView.swift */; };
 		BED583CF31E8218AE37A5AEE /* PresetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8F1E748DA5D4FD2BEB0B029 /* PresetStore.swift */; };
 		CD5DA7D3FB71A3F3BDE6EDDF /* QRScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 122C9035CA5EB4F4EC5F1050 /* QRScanner.swift */; };
 		D09A2C326F42C478B5AD774F /* QRCode in Frameworks */ = {isa = PBXBuildFile; productRef = DFB13FE9E93EF9F37C3DC394 /* QRCode */; };
+		ED38A591A829857FFF6C23A8 /* ShakeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54C51B40C3D546A890753C28 /* ShakeDetector.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,12 +42,12 @@
 		2C1FCDDDFA8C77514180C8F4 /* QRinajarApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRinajarApp.swift; sourceTree = "<group>"; };
 		40394A28D441C9A662CA0879 /* QRinajar.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = QRinajar.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		48F9437CC0FF3CD237599BA6 /* PreviewCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewCard.swift; sourceTree = "<group>"; };
+		54C51B40C3D546A890753C28 /* ShakeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeDetector.swift; sourceTree = "<group>"; };
 		54E4E494C43A295978733450 /* Controls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controls.swift; sourceTree = "<group>"; };
 		55467E9FC7F215F96CC08416 /* ScanTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanTester.swift; sourceTree = "<group>"; };
 		6968B746A70FF63856385CCB /* ContentDataForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDataForm.swift; sourceTree = "<group>"; };
 		7C99D421C8A0B37586239DF8 /* AppAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppAppearance.swift; sourceTree = "<group>"; };
 		7EC935D742CE18CDCC7EFB30 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
-		7FE3ED524B58F430F1248833 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		82CC9360DD635627DE276007 /* QRCardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCardRenderer.swift; sourceTree = "<group>"; };
 		A35BD9572321440DA2C20778 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
 		A54DFEA38431E33A90627327 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
@@ -100,7 +100,7 @@
 				A54DFEA38431E33A90627327 /* LibraryView.swift */,
 				48F9437CC0FF3CD237599BA6 /* PreviewCard.swift */,
 				122C9035CA5EB4F4EC5F1050 /* QRScanner.swift */,
-				7FE3ED524B58F430F1248833 /* SettingsView.swift */,
+				54C51B40C3D546A890753C28 /* ShakeDetector.swift */,
 				29F8A2CB3DCB9AAA1ECCF8C7 /* SplashScreenView.swift */,
 				A8B480B08B167329BCB3A278 /* StyleView.swift */,
 				05C4AC0F476EFBDDDB52A23E /* WelcomeView.swift */,
@@ -236,7 +236,7 @@
 				B6473A7142DAC0163863293A /* RootTabView.swift in Sources */,
 				45252347FCEC6139E66B9B0B /* ScanTester.swift in Sources */,
 				6D6614699F9B713E885A5946 /* SelfTest.swift in Sources */,
-				BE5904185A5867FA8EE0F59B /* SettingsView.swift in Sources */,
+				ED38A591A829857FFF6C23A8 /* ShakeDetector.swift in Sources */,
 				82FCB440187489B254F0D0F7 /* SplashScreenView.swift in Sources */,
 				8D314542EDE89C2FAF87F336 /* StyleView.swift in Sources */,
 				B8990A8D35064282D557711C /* WelcomeView.swift in Sources */,

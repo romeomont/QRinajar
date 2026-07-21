@@ -139,6 +139,21 @@ struct GlassButtonStyle: ViewModifier {
     }
 }
 
+// The create flow's floating Next/Save bar — a pill-shaped, elevated CTA
+// that hovers above the safe area instead of a full-bleed bottom bar.
+struct FloatingPillButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 60)
+            .background(brandBlue, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .shadow(color: brandBlue.opacity(0.45), radius: 16, x: 0, y: 8)
+            .opacity(configuration.isPressed ? 0.85 : 1)
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+    }
+}
+
 struct GlassProminentButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {

@@ -4,7 +4,6 @@ import SwiftUI
 // create flow's "Enter details" step can embed it directly.
 struct ContentDataForm: View {
     @Environment(QRDesign.self) private var design
-    @State private var showECC = false
 
     var body: some View {
         @Bindable var design = design
@@ -63,72 +62,146 @@ struct ContentDataForm: View {
                 }
             }
 
-            HStack {
-                Button {
-                    showECC = true
-                } label: {
-                    HStack {
-                        Label("Error correction", systemImage: "checkmark.shield")
-                        Spacer()
-                        Text(design.ecc).foregroundStyle(.secondary)
-                        Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                InfoTip(
-                    title: "Error correction",
-                    text: "How much of the code can be damaged, dirty, or covered by a logo and still scan. Higher levels survive more damage but pack the code with denser modules. M is a good default; use Q or H if you're adding a center logo."
-                )
-            }
-            .padding()
-            .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
-        }
-        .sheet(isPresented: $showECC) {
-            ECCSheet(ecc: $design.ecc)
-                .presentationDetents([.medium])
         }
     }
 }
 
-struct ECCSheet: View {
+// A 4-stop thermometer (L/M/Q/H) that lives right under the QR preview so
+// the effect of raising error correction is visible immediately, instead
+// of behind a sheet.
+struct ECCThermometer: View {
     @Binding var ecc: String
-    @Environment(\.dismiss) private var dismiss
+    @State private var showInfo = false
 
-    private let options: [(String, String)] = [
+    private let levels: [(String, String)] = [
         ("L", "7% recovery — max capacity"),
         ("M", "15% recovery — recommended default"),
         ("Q", "25% recovery — good with a logo"),
         ("H", "30% recovery — best with a logo"),
     ]
 
+    // The percent each level actually recovers, used to size the covered
+    // corner in the visual below.
+    private let percents: [Double] = [0.07, 0.15, 0.25, 0.30]
+
+    private var selectedIndex: Int {
+        levels.firstIndex { $0.0 == ecc } ?? 1
+    }
+
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    ForEach(options, id: \.0) { opt in
-                        Button {
-                            ecc = opt.0; dismiss()
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text(opt.0).font(.headline)
-                                    Text(opt.1).font(.caption).foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                if ecc == opt.0 { Image(systemName: "checkmark").foregroundStyle(brandBlue) }
-                            }
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Label("Error correction", systemImage: "checkmark.shield")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text(levels[selectedIndex].1)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                InfoTip(
+                    title: "Error correction",
+                    text: "How much of the code can be missing, dirty, or obscured by a logo and still scan. Higher levels tolerate more missing area but pack the code with denser modules. M is a good default; use Q or H if you're adding a center logo."
+                )
+            }
+
+            HStack(spacing: 6) {
+                ForEach(levels.indices, id: \.self) { i in
+                    Button {
+                        withAnimation(.spring(response: 0.32, dampingFraction: 0.8)) {
+                            ecc = levels[i].0
                         }
-                        .buttonStyle(.plain)
+                    } label: {
+                        VStack(spacing: 4) {
+                            Capsule()
+                                .fill(i <= selectedIndex ? brandBlue : Color.secondary.opacity(0.2))
+                                .frame(height: 10)
+                            Text(levels[i].0)
+                                .font(.caption2.weight(i == selectedIndex ? .bold : .regular))
+                                .foregroundStyle(i == selectedIndex ? brandBlue : .secondary)
+                        }
                     }
-                } header: {
-                    Text("Error correction")
-                } footer: {
-                    Text("Use Q or H when embedding a center logo. Long text makes a denser code — run Test scan before printing.")
+                    .buttonStyle(.plain)
                 }
             }
-            .navigationTitle("Error correction")
-            .navigationBarTitleDisplayMode(.inline)
+
+            RecoveryVisual(percent: percents[selectedIndex])
+                .padding(.top, 4)
+        }
+        .padding()
+        .background(RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial))
+    }
+}
+
+// Shows, at a glance, how much of the code the current level can lose to
+// dirt/damage/a logo and still scan: a mock module grid with a chunk
+// covered, sized to the selected level's actual recovery percentage.
+struct RecoveryVisual: View {
+    var percent: Double
+
+    private let gridSize = 7
+
+    // A fixed, hand-picked module pattern — just needs to read as
+    // "QR-ish," not encode anything real.
+    private let pattern: Set<Int> = [
+        0, 2, 3, 5, 8, 10, 13, 14, 16, 18, 19, 21, 23, 24, 27, 29,
+        30, 32, 35, 36, 38, 41, 43, 44, 46, 47,
+    ]
+
+    // The real percentages (7–30%) barely register visually at true scale,
+    // so the covered corner is exaggerated (roughly doubled) purely to make
+    // the L → H difference legible at a glance — the number alongside it
+    // is still the real figure.
+    private var coverFraction: Double {
+        min(percent * 2.2, 0.62)
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack(alignment: .bottomTrailing) {
+                GeometryReader { geo in
+                    let cell = geo.size.width / CGFloat(gridSize)
+                    Canvas { ctx, size in
+                        for row in 0..<gridSize {
+                            for col in 0..<gridSize {
+                                guard pattern.contains(row * gridSize + col) else { continue }
+                                let rect = CGRect(
+                                    x: CGFloat(col) * cell + 1, y: CGFloat(row) * cell + 1,
+                                    width: cell - 2, height: cell - 2
+                                )
+                                ctx.fill(Path(roundedRect: rect, cornerRadius: 1.5), with: .color(.black.opacity(0.85)))
+                            }
+                        }
+                    }
+                }
+                .aspectRatio(1, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                // The "damaged" patch — proportionally sized to what this
+                // level can tolerate — with a checkmark to show it still scans.
+                GeometryReader { geo in
+                    let side = geo.size.width * CGFloat(coverFraction)
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(brandBlue)
+                        Image(systemName: "checkmark")
+                            .font(.system(size: max(side * 0.45, 8), weight: .bold))
+                            .foregroundStyle(.white)
+                    }
+                    .frame(width: side, height: side)
+                    .position(x: geo.size.width - side / 2, y: geo.size.height - side / 2)
+                }
+            }
+            .frame(width: 64, height: 64)
+            .background(RoundedRectangle(cornerRadius: 8).fill(.white))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Still scans even with part missing or obscured")
+                    .font(.caption2.weight(.semibold))
+                Text("Blue patch shows roughly how much of the code can be missing, dirty, or covered by a logo at this level and still scan.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 }
+

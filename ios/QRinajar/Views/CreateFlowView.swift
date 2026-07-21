@@ -48,8 +48,9 @@ private struct FlowStepView: View {
 
     @Environment(QRDesign.self) private var design
     @Environment(PresetStore.self) private var store
+    @Environment(\.colorScheme) private var colorScheme
+    @AppColorSchemeStorage private var appearance
     @State private var showLibrary = false
-    @State private var showSettings = false
     @State private var showSaveAlert = false
     @State private var saveName = ""
 
@@ -75,6 +76,13 @@ private struct FlowStepView: View {
                 PreviewCard(maxHeight: step == .export ? 320 : 200, bare: step == .data)
                     .padding(.horizontal)
                     .padding(.top, 8)
+            }
+
+            if step == .data {
+                @Bindable var design = design
+                ECCThermometer(ecc: $design.ecc)
+                    .padding(.horizontal)
+                    .padding(.top, 12)
             }
 
             ScrollView {
@@ -125,9 +133,16 @@ private struct FlowStepView: View {
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
-                    showSettings = true
+                    // Tapping switches straight to the opposite of whatever
+                    // is currently on screen — no settings detour. "Follow
+                    // System" is only reachable by matching the device's
+                    // own appearance, not from here.
+                    appearance = colorScheme == .dark ? .light : .dark
                 } label: {
-                    Image(systemName: "gearshape")
+                    // Shows the mode a tap would take you toward, not the
+                    // mode you're in — dark mode shows the sun, light shows
+                    // the moon, same convention as most system toggles.
+                    Image(systemName: colorScheme == .dark ? "sun.max.fill" : "moon.fill")
                 }
                 Button {
                     showLibrary = true
@@ -138,9 +153,6 @@ private struct FlowStepView: View {
         }
         .sheet(isPresented: $showLibrary) {
             LibraryView()
-        }
-        .sheet(isPresented: $showSettings) {
-            SettingsView()
         }
         .onAppear {
             if step == .style {
@@ -177,30 +189,33 @@ private struct FlowStepView: View {
         }
     }
 
+    // No Back button here — the nav bar's own back chevron (from the real
+    // NavigationStack push) already covers that.
     private var footer: some View {
-        HStack(spacing: 12) {
-            // No Back button here — the nav bar's own back chevron (from the
-            // real NavigationStack push) already covers that.
+        Group {
             if step == .export {
                 Button {
                     saveName = defaultName()
                     showSaveAlert = true
                 } label: {
-                    Text("Save to Library").frame(maxWidth: .infinity)
+                    Text("SAVE FOR LATER")
+                        .font(.headline.weight(.bold))
                 }
-                .modifier(GlassProminentButtonStyle())
+                .buttonStyle(FloatingPillButtonStyle())
             } else {
                 Button {
                     if let next = FlowStep(rawValue: step.rawValue + 1) {
                         path.append(next)
                     }
                 } label: {
-                    Text("Next").frame(maxWidth: .infinity)
+                    Text("NEXT")
+                        .font(.headline.weight(.bold))
                 }
-                .modifier(GlassProminentButtonStyle())
+                .buttonStyle(FloatingPillButtonStyle())
             }
         }
-        .padding()
+        .padding(.horizontal, 18)
+        .padding(.bottom, 8)
         .alert("Save to Library", isPresented: $showSaveAlert) {
             TextField("Name", text: $saveName)
             Button("Save") {
@@ -229,6 +244,11 @@ struct ContentTypePicker: View {
     @Environment(QRDesign.self) private var design
     var onSelect: () -> Void = {}
 
+    // design.contentType always has a real value (it defaults to .website
+    // so the rest of the model has something to work with), but nothing
+    // should read as "selected" here until the user actually taps a card.
+    @State private var hasSelected = false
+
     private var orderedTypes: [ContentType] {
         ContentType.allCases.filter { $0 != .text } + [.text]
     }
@@ -251,12 +271,14 @@ struct ContentTypePicker: View {
             ForEach(orderedTypes) { t in
                 Button {
                     design.contentType = t
+                    hasSelected = true
                     onSelect()
                 } label: {
+                    let selected = hasSelected && design.contentType == t
                     VStack(spacing: 10) {
                         ZStack {
                             Circle()
-                                .fill(design.contentType == t ? brandBlue.opacity(0.28) : brandBlue.opacity(0.12))
+                                .fill(selected ? brandBlue.opacity(0.28) : brandBlue.opacity(0.12))
                                 .frame(width: 56, height: 56)
                             Image(systemName: t.symbol)
                                 .font(.title2)
@@ -270,11 +292,11 @@ struct ContentTypePicker: View {
                     .padding(.vertical, 22)
                     .background(
                         RoundedRectangle(cornerRadius: 24)
-                            .fill(design.contentType == t ? brandBlue.opacity(0.15) : Color.secondary.opacity(0.08))
+                            .fill(selected ? brandBlue.opacity(0.15) : Color.secondary.opacity(0.08))
                     )
                     .overlay(
                         RoundedRectangle(cornerRadius: 24)
-                            .strokeBorder(design.contentType == t ? brandBlue : Color.clear, lineWidth: 2)
+                            .strokeBorder(selected ? brandBlue : Color.clear, lineWidth: 2)
                     )
                     .contentShape(RoundedRectangle(cornerRadius: 24))
                 }

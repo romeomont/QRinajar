@@ -61,7 +61,7 @@ struct DesignSnapshot: Codable, Equatable {
     var borderRadius: Int = 14
 
     // Dots
-    var dotStyle: String = "rounded"
+    var dotStyle: String = "square"
     var dotColor: String = "#0d1b2a"
     var dotGradient: Bool = false
     var dotColor2: String = "#35b5e5"

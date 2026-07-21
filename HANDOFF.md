@@ -32,11 +32,19 @@ The app is **one linear flow**, not a tab bar:
    not by QRDesign itself). Backing out of this step with unsaved changes
    (compared against a snapshot captured on `.onAppear`) prompts to save,
    discard, or keep editing before the pop is allowed to complete.
-4. **Save & export** (`.export`) — `Views/ExportView.swift`. Just
-   **Save to Photos** and **Copy**, both large rounded-square glass
-   buttons. The PNG/JPEG/SVG ShareLink row and the in-app "scan self-test"
-   button were both removed — ask before re-adding either without reading
-   the "known issues" section below.
+4. **Save & export** (`.export`) — `Views/ExportView.swift`. Three
+   actions, in this order: **Copy**, **Save** (to Photos), **Share**
+   (native `UIActivityViewController` via `ActivityShareSheet`, which
+   `LibraryView`'s QR popup also reuses — it's `internal`, not `private`,
+   specifically so it can be shared across files). Share is the visually
+   prominent one. The PNG/JPEG/SVG ShareLink row and the in-app
+   "scan self-test" button were both removed a while back — ask before
+   re-adding either without reading the "known issues" section below.
+
+The footer CTA (Next / Save for later) is a floating pill
+(`FloatingPillButtonStyle` in `Views/Controls.swift`) — solid `brandBlue`,
+16pt corner radius (matches the Style step's preset cards), soft glow
+shadow, inset from the screen edges rather than a full-bleed bar.
 
 All four steps are pushed onto a real `NavigationStack` (see
 `CreateFlowView.body`, `path: [FlowStep]`), not swapped via `@State` in
@@ -47,13 +55,65 @@ Persistent across every step (via `.overlay` in `FlowStepView`):
 - A floating **scanner button** (bottom-trailing) — `Views/QRScanner.swift`.
   Explains the camera permission before requesting it, decodes via
   AVFoundation, opens the result in Safari, fires a success haptic.
-- Toolbar **gear** (Settings — light/dark/system) and **tray** (Library)
-  icons, top-trailing, auto-grouped into one glass pill by the system.
+- Toolbar **appearance toggle** and **tray** (Library) icons, top-trailing,
+  auto-grouped into one glass pill by the system. The appearance icon
+  shows sun in dark mode / moon in light mode (the mode a tap moves
+  *toward*) and switches directly — there is no Settings screen anymore;
+  `SettingsView.swift` was deleted. Tapping sets `AppColorSchemeStorage`
+  straight to the opposite of `colorScheme`, so "Follow System" is only
+  reachable by actually matching the device's own appearance, not from
+  this button.
 
 On cold launch: `SplashScreenView` (~2.4s, skipped when
 `QRINAJAR_TAB`/`QRINAJAR_SELFTEST` env vars are set) → first-run only,
 `WelcomeView` (explains the app, lets you pick light/dark/system) →
 `RootTabView` → `CreateFlowView`.
+
+### Error correction (Enter details step)
+
+`ECCThermometer` in `Views/ContentDataForm.swift` replaced the old
+sheet-based ECC picker: an inline 4-stop L/M/Q/H bar directly under the
+live preview, filling toward the selected level, plus `RecoveryVisual` — a
+small mock module grid with a blue "damage patch" sized (and exaggerated
+~2.2x for legibility) to that level's real recovery percentage. Copy is
+deliberately framed around what can be *missing, dirty, or covered by a
+logo*, not abstract "tolerance."
+
+### Library (`Views/LibraryView.swift`)
+
+Rewritten from a plain `List` with native `.swipeActions` to a
+custom-drawn `LibraryRow` because the native API can't be driven
+programmatically (needed for the first-time swipe demo) and can't do a
+full swipe-through delete with velocity:
+
+- No inline delete button and no trailing chevron — a preset row shows
+  name/date, a QR icon (opens `QRPopupCard`), and that's it.
+- Swiping reveals a red backing (opacity gated by `revealAmount`, zero at
+  rest — it never bleeds outside the reveal) via `simultaneousGesture`
+  (not `.gesture`) so the drag isn't delayed behind the row's own tap
+  recognizer. Dragging past half the row's own width (`rowWidth * 0.5`,
+  captured via a `GeometryReader` background), or a fast enough flick
+  (`predictedEndTranslation`), commits to immediate deletion — no
+  confirmation alert.
+- **Shake to undo**: `Views/ShakeDetector.swift` bridges UIKit's
+  `motionEnded`/`.motionShake` (there's no SwiftUI shake gesture) to a
+  `NotificationCenter` post and a `View.onShake { }` modifier.
+  `LibraryView` keeps the last-deleted preset + its original index for 8
+  seconds (`DispatchWorkItem`, cancelled/replaced on each new delete) and
+  restores it via `PresetStore.restore(_:at:)` on shake.
+  `PresetStore.restore` (added alongside `save`/`delete`) re-inserts at a
+  clamped index rather than always prepending, so undo puts a row back
+  where it was.
+- First row plays a one-time scripted peek-and-return
+  (`AppStorage("hasSeenLibrarySwipeDemo")`) ~0.5s after the library
+  appears, so the swipe gesture isn't hidden from first-time users.
+- Tapping a row's QR icon opens `QRPopupCard` — a bottom-anchored card
+  over a dimmed scrim, flush against the bottom safe area (top corners
+  only rounded via `.rect(topLeadingRadius:topTrailingRadius:)`), with its
+  own Share button. Tapping the scrim dismisses it.
+- "Save current design" and "Reset to factory" were removed from the
+  Library menu — saving now only happens from the Export step's
+  "Save for later" pill.
 
 ## Known issues / deliberately untested paths
 
