@@ -8,8 +8,9 @@ struct QRinajarApp: App {
 
     init() {
         let store = PresetStore()
-        let last = store.loadLast()
-        _design = State(initialValue: QRDesign(last ?? .factory))
+        // Always starts blank — an in-progress, unsaved design shouldn't
+        // reappear just because the app was closed instead of saved.
+        _design = State(initialValue: QRDesign(.factory))
         _store = State(initialValue: store)
 
         if ProcessInfo.processInfo.environment["QRINAJAR_SELFTEST"] != nil {
@@ -35,10 +36,6 @@ struct QRinajarApp: App {
             .environment(design)
             .environment(store)
             .tint(brandBlue)
-            .onChange(of: design.snapshot) { _, snap in
-                // Auto-persist last design (mirrors web localStorage behaviour).
-                store.saveLast(snap)
-            }
         }
     }
 }

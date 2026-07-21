@@ -67,6 +67,33 @@ private struct FlowStepView: View {
     @State private var showStartOverNewLabel = false
     @State private var startOverBounceScheduled = false
 
+    // A gentle, continuous twinkle on the start-over circle — three tiny
+    // sparkles fading in and out on their own staggered, slow cycles so it
+    // never reads as one uniform blink.
+    @State private var sparkle1 = false
+    @State private var sparkle2 = false
+    @State private var sparkle3 = false
+
+    private var sparkles: some View {
+        ZStack {
+            Image(systemName: "sparkle")
+                .font(.system(size: 7))
+                .foregroundStyle(brandBlue.opacity(sparkle1 ? 0.9 : 0.15))
+                .scaleEffect(sparkle1 ? 1 : 0.6)
+                .offset(x: 18, y: -20)
+            Image(systemName: "sparkle")
+                .font(.system(size: 6))
+                .foregroundStyle(brandBlue.opacity(sparkle2 ? 0.85 : 0.1))
+                .scaleEffect(sparkle2 ? 1 : 0.6)
+                .offset(x: -20, y: 12)
+            Image(systemName: "sparkle")
+                .font(.system(size: 5))
+                .foregroundStyle(brandBlue.opacity(sparkle3 ? 0.9 : 0.1))
+                .scaleEffect(sparkle3 ? 1 : 0.6)
+                .offset(x: 15, y: 18)
+        }
+    }
+
     // Tracks the exact design last written to the Library so a repeat
     // Save with nothing changed can say so instead of writing a duplicate.
     @State private var lastSavedSnapshot: DesignSnapshot?
@@ -274,9 +301,20 @@ private struct FlowStepView: View {
                         // destructive confirm, smaller footprint than its
                         // old standalone card.
                         Button {
-                            showStartAnotherAlert = true
+                            // If this exact design is already saved and
+                            // untouched since, starting another doesn't
+                            // discard anything unsaved — just do it, no
+                            // confirmation needed.
+                            if let last = lastSavedSnapshot, last == design.snapshot {
+                                design.apply(.factory)
+                                path = []
+                            } else {
+                                showStartAnotherAlert = true
+                            }
                         } label: {
                             ZStack {
+                                sparkles
+
                                 Image(systemName: "plus")
                                     .font(.headline.weight(.bold))
                                     .opacity(showStartOverNewLabel ? 0 : 1)
@@ -293,6 +331,15 @@ private struct FlowStepView: View {
                             guard !startOverBounceScheduled else { return }
                             startOverBounceScheduled = true
                             scheduleStartOverBounce()
+                            withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+                                sparkle1 = true
+                            }
+                            withAnimation(.easeInOut(duration: 1.7).repeatForever(autoreverses: true).delay(0.5)) {
+                                sparkle2 = true
+                            }
+                            withAnimation(.easeInOut(duration: 1.3).repeatForever(autoreverses: true).delay(0.9)) {
+                                sparkle3 = true
+                            }
                         }
 
                         Button {

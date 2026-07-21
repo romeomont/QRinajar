@@ -35,24 +35,24 @@ struct DesignSnapshot: Codable, Equatable {
     var ecc: String = "M"
 
     // Wi-Fi fields
-    var wifiSSID: String = "MyWiFiNetwork"
-    var wifiPassword: String = "changeme123"
+    var wifiSSID: String = ""
+    var wifiPassword: String = ""
     var wifiSecurity: String = "WPA"     // WPA / WEP / nopass
     var wifiHidden: Bool = false
 
     // vCard / contact fields
-    var contactFirst: String = "Jane"
-    var contactLast: String = "Doe"
-    var contactOrg: String = "Example Org"
-    var contactTitle: String = "Field Technician"
-    var contactPhone: String = "+1 555 0100"
-    var contactEmail: String = "jane.doe@example.com"
-    var contactURL: String = "https://example.com"
+    var contactFirst: String = ""
+    var contactLast: String = ""
+    var contactOrg: String = ""
+    var contactTitle: String = ""
+    var contactPhone: String = ""
+    var contactEmail: String = ""
+    var contactURL: String = ""
 
     // Website / social / text single-field payloads
-    var websiteURL: String = "https://example.com"
-    var socialURL: String = "https://instagram.com/yourhandle"
-    var textBody: String = "Hello, world!"
+    var websiteURL: String = ""
+    var socialURL: String = ""
+    var textBody: String = ""
 
     // Shape & layout
     var shape: String = "square"

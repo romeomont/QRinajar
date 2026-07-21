@@ -8,8 +8,10 @@ struct SavedPreset: Codable, Identifiable, Equatable {
     var design: DesignSnapshot
 }
 
-// Persists named presets and the "last design" as Codable JSON in Application Support,
-// an upgrade over the web app's single localStorage slot.
+// Persists named presets as Codable JSON in Application Support. The
+// in-progress (unsaved) design is deliberately NOT persisted across
+// launches — closing the app without hitting Save discards it, same as
+// any other unsaved form.
 @Observable
 final class PresetStore {
     private(set) var presets: [SavedPreset] = []
@@ -41,7 +43,6 @@ final class PresetStore {
         return dir
     }
     private var presetsURL: URL { supportDir.appendingPathComponent("presets.json") }
-    private var lastURL: URL { supportDir.appendingPathComponent("last-design.json") }
 
     init() {
         load()
@@ -89,17 +90,5 @@ final class PresetStore {
         guard !trimmed.isEmpty else { return }
         presets[index].name = trimmed
         persist()
-    }
-
-    // Last-design auto-persist (mirrors the web app localStorage boot behaviour).
-    func saveLast(_ design: DesignSnapshot) {
-        if let data = try? JSONEncoder().encode(design) {
-            try? data.write(to: lastURL, options: .atomic)
-        }
-    }
-
-    func loadLast() -> DesignSnapshot? {
-        guard let data = try? Data(contentsOf: lastURL) else { return nil }
-        return try? JSONDecoder().decode(DesignSnapshot.self, from: data)
     }
 }
