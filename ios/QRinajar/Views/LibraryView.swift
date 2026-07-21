@@ -51,7 +51,11 @@ struct LibraryView: View {
                             if value.translation.height > 48 || flungDown {
                                 dismiss()
                             } else {
-                                withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                                // interactiveSpring settles faster than the
+                                // full physics spring used elsewhere — fewer
+                                // animated frames of the whole List moving,
+                                // which is what made the snap-back feel laggy.
+                                withAnimation(.interactiveSpring(response: 0.28, dampingFraction: 0.9, blendDuration: 0)) {
                                     dragOffset = 0
                                 }
                             }
@@ -69,6 +73,7 @@ struct LibraryView: View {
                         ForEach(Array(store.presets.enumerated()), id: \.element.id) { index, preset in
                             LibraryRow(
                                 preset: preset,
+                                isNew: store.isNew(preset),
                                 playDemo: index == 0 && shouldPlayDemo,
                                 onOpen: {
                                     design.apply(preset.design)
@@ -148,6 +153,7 @@ struct LibraryView: View {
 // one-time reveal demo — native swipeActions has no API for that.
 private struct LibraryRow: View {
     let preset: SavedPreset
+    let isNew: Bool
     let playDemo: Bool
     let onOpen: () -> Void
     let onShowQR: () -> Void
@@ -231,8 +237,9 @@ private struct LibraryRow: View {
                     .frame(width: deleteWidth, height: rowHeight)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        withAnimation(.easeOut(duration: 0.2)) { offset = 0 }
-                        onDelete()
+                        withAnimation(.easeOut(duration: 0.22)) {
+                            onDelete()
+                        }
                     }
                     .opacity(revealAmount)
                 }
@@ -241,7 +248,17 @@ private struct LibraryRow: View {
             Button(action: handleContentTap) {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(preset.name).font(.title3.weight(.semibold)).foregroundStyle(.primary)
+                        HStack(spacing: 6) {
+                            Text(preset.name).font(.title3.weight(.semibold)).foregroundStyle(.primary)
+                            if isNew {
+                                Text("NEW")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.red, in: Capsule())
+                            }
+                        }
                         Text(preset.createdAt.formatted(date: .abbreviated, time: .shortened))
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
@@ -316,10 +333,13 @@ private struct LibraryRow: View {
                         let fullSwipeThreshold = rowWidth * 0.85
                         let predictedEnd = dragStartOffset + value.predictedEndTranslation.width
                         if predictedEnd < -fullSwipeThreshold {
-                            withAnimation(.easeIn(duration: 0.22)) {
-                                offset = -rowWidth - 60
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            // Delete immediately, in the same animation as the
+                            // row's removal transition below — animating the
+                            // offset first and only removing the row after a
+                            // delay left a split-second where the row snapped
+                            // back into place before the list's own removal
+                            // animation played.
+                            withAnimation(.easeOut(duration: 0.22)) {
                                 onDelete()
                             }
                         } else {
@@ -342,6 +362,10 @@ private struct LibraryRow: View {
             }
         }
         .clipped()
+        // Removal continues in the same leftward direction as the delete
+        // swipe/tap that triggered it, so the row exits sharply in one
+        // motion instead of snapping back to center first.
+        .transition(.asymmetric(insertion: .opacity, removal: .move(edge: .leading).combined(with: .opacity)))
         // No horizontal inset — the delete/rename color reaches the true
         // edges of the row (Mail-style); the row's own text content gets
         // its margin from padding inside the row instead.
@@ -433,7 +457,7 @@ struct QRPopupCard: View {
                                 if value.translation.height > 60 || flungDown {
                                     onDismiss()
                                 } else {
-                                    withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                                    withAnimation(.interactiveSpring(response: 0.28, dampingFraction: 0.9, blendDuration: 0)) {
                                         dragOffset = 0
                                     }
                                 }
@@ -453,18 +477,23 @@ struct QRPopupCard: View {
                 Text(preset.name)
                     .font(.headline)
 
-                Button {
-                    if let ui = image { shareImage = ShareableImage(image: ui) }
-                } label: {
-                    Label("Share", systemImage: "square.and.arrow.up")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                // Same size/shape as the SAVE/NEXT pills elsewhere in the
+                // app — half-width, centered — rather than a full-bleed bar.
+                GeometryReader { geo in
+                    HStack {
+                        Spacer(minLength: 0)
+                        Button {
+                            if let ui = image { shareImage = ShareableImage(image: ui) }
+                        } label: {
+                            Text("Share")
+                                .font(.headline.weight(.bold))
+                        }
+                        .buttonStyle(FloatingPillButtonStyle())
+                        .frame(width: geo.size.width / 2)
+                        Spacer(minLength: 0)
+                    }
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(brandBlue)
-                .buttonBorderShape(.roundedRectangle(radius: 14))
-                .padding(.horizontal, 28)
+                .frame(height: 60)
                 .padding(.bottom, 24)
             }
             .frame(maxWidth: .infinity)

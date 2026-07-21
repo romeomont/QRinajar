@@ -5,6 +5,13 @@ import SwiftUI
 struct ContentDataForm: View {
     @Environment(QRDesign.self) private var design
 
+    // A dimmer prompt than the system default so the demo text (e.g.
+    // "https://example.com") reads clearly as an example to fill in, not as
+    // already-entered content.
+    private func hint(_ text: String) -> Text {
+        Text(text).foregroundStyle(.secondary.opacity(0.55))
+    }
+
     var body: some View {
         @Bindable var design = design
         VStack(spacing: 20) {
@@ -12,27 +19,27 @@ struct ContentDataForm: View {
                 switch design.contentType {
                 case .website:
                     LabeledField("Website URL") {
-                        TextField("https://example.com", text: $design.websiteURL)
+                        TextField("", text: $design.websiteURL, prompt: hint("https://example.com"))
                             .textInputAutocapitalization(.never).autocorrectionDisabled()
                             .keyboardType(.URL)
                     }
                 case .text:
                     LabeledField("Text") {
-                        TextField("Hello, world!", text: $design.textBody, axis: .vertical)
+                        TextField("", text: $design.textBody, prompt: hint("Hello, world!"), axis: .vertical)
                             .lineLimit(3...8)
                     }
                 case .social:
                     LabeledField("Profile URL") {
-                        TextField("https://instagram.com/yourhandle", text: $design.socialURL)
+                        TextField("", text: $design.socialURL, prompt: hint("https://instagram.com/yourhandle"))
                             .textInputAutocapitalization(.never).autocorrectionDisabled()
                             .keyboardType(.URL)
                     }
                 case .wifi:
                     LabeledField("Network name (SSID)") {
-                        TextField("MyWiFiNetwork", text: $design.wifiSSID).autocorrectionDisabled()
+                        TextField("", text: $design.wifiSSID, prompt: hint("MyWiFiNetwork")).autocorrectionDisabled()
                     }
                     LabeledField("Password") {
-                        TextField("password", text: $design.wifiPassword).autocorrectionDisabled()
+                        TextField("", text: $design.wifiPassword, prompt: hint("password")).autocorrectionDisabled()
                             .textInputAutocapitalization(.never)
                     }
                     Picker("Security", selection: $design.wifiSecurity) {
@@ -43,20 +50,20 @@ struct ContentDataForm: View {
                     Toggle("Hidden network", isOn: $design.wifiHidden)
                 case .contact:
                     HStack {
-                        LabeledField("First") { TextField("Jane", text: $design.contactFirst) }
-                        LabeledField("Last") { TextField("Doe", text: $design.contactLast) }
+                        LabeledField("First") { TextField("", text: $design.contactFirst, prompt: hint("Jane")) }
+                        LabeledField("Last") { TextField("", text: $design.contactLast, prompt: hint("Doe")) }
                     }
-                    LabeledField("Organization") { TextField("Example Org", text: $design.contactOrg) }
-                    LabeledField("Title") { TextField("Field Technician", text: $design.contactTitle) }
+                    LabeledField("Organization") { TextField("", text: $design.contactOrg, prompt: hint("Example Org")) }
+                    LabeledField("Title") { TextField("", text: $design.contactTitle, prompt: hint("Field Technician")) }
                     LabeledField("Phone") {
-                        TextField("+1 555 0100", text: $design.contactPhone).keyboardType(.phonePad)
+                        TextField("", text: $design.contactPhone, prompt: hint("+1 555 0100")).keyboardType(.phonePad)
                     }
                     LabeledField("Email") {
-                        TextField("jane@example.com", text: $design.contactEmail)
+                        TextField("", text: $design.contactEmail, prompt: hint("jane@example.com"))
                             .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.emailAddress)
                     }
                     LabeledField("URL") {
-                        TextField("https://example.com", text: $design.contactURL)
+                        TextField("", text: $design.contactURL, prompt: hint("https://example.com"))
                             .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
                     }
                 }
@@ -101,6 +108,11 @@ struct ECCThermometer: View {
         levels.firstIndex { $0.0 == ecc } ?? 1
     }
 
+    // A slow, subtle breathing highlight near the end of each unselected
+    // bar — just enough to read as "there's more here" without competing
+    // for attention with the selected level.
+    @State private var inactivePulse = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -128,12 +140,35 @@ struct ECCThermometer: View {
                             Capsule()
                                 .fill(i <= selectedIndex ? brandBlue : Color.secondary.opacity(0.2))
                                 .frame(height: 10)
+                                .overlay {
+                                    if i > selectedIndex {
+                                        // A full-bar gradient (not just a
+                                        // sliver) so the pulse reads as the
+                                        // bar actually filling in toward the
+                                        // end, rather than an empty capsule
+                                        // with a faint dot on it.
+                                        Capsule()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: [.clear, brandBlue.opacity(inactivePulse ? 0.55 : 0.15)],
+                                                    startPoint: .leading,
+                                                    endPoint: .trailing
+                                                )
+                                            )
+                                            .frame(height: 10)
+                                    }
+                                }
                             Text(levels[i].0)
                                 .font(.caption2.weight(i == selectedIndex ? .bold : .regular))
                                 .foregroundStyle(i == selectedIndex ? brandBlue : .secondary)
                         }
                     }
                     .buttonStyle(.plain)
+                }
+            }
+            .onAppear {
+                withAnimation(.easeInOut(duration: 2.4).repeatForever(autoreverses: true)) {
+                    inactivePulse = true
                 }
             }
 

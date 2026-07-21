@@ -73,43 +73,54 @@ unsaved changes prompts to save or discard first.
 
 Other things worth knowing:
 
-- **Share step** - the last step's FINISH button opens a native
-  Save/Share choice: Save prompts for a name (pre-filled with a default),
-  adds it to the Library, and shows a brief "Added to Library" toast
-  instead of jumping there - if nothing's changed since the last save,
-  it says "Already in Library" instead of writing a duplicate. Share
-  opens the native iOS share sheet. Below that, a "Start Another" button
-  resets to a blank design and returns to step one - it always asks to
-  confirm first, since it discards the current design.
+- **Share step** - three actions centered at the bottom: a plus button on
+  the left starts another design (always asks to confirm first, since it
+  discards the current one, with an occasional slow "New" callout that
+  crossfades over the icon every 30s to point it out), a SAVE pill in the
+  middle goes straight to the Library - prompts for a name (pre-filled
+  with a default), shows a brief "Added to Library" toast instead of
+  jumping there, or "Already in Library" if nothing's changed since the
+  last save - and a Share icon on the right opens the native iOS share
+  sheet as an independent option, not something gated behind Save.
 - **Library** - saved presets (reachable from any step via the
-  `books.vertical` toolbar icon); tap a row to load it and return to
-  editing, or tap its QR icon for a quick full-preview in a bottom popup
-  card (share it straight from there, drag its handle down or tap
+  `books.vertical` toolbar icon, which shows a plain red dot rather than a
+  count whenever there's something new); tap a row to load it and return
+  to editing, or tap its QR icon for a quick full-preview in a bottom
+  popup card (share it straight from there, drag its handle down or tap
   outside to dismiss). Swipe a row left to delete it - only a full
   swipe-through with real inertia (a fast flick) deletes; a slow drag
   that merely crosses the halfway point just reveals the Delete button
   (tap it to confirm) rather than deleting outright, no confirmation
-  alert either way; shake the device to undo. Swipe a row right to
+  alert either way; shake the device to undo. Deleting exits sharply in
+  the same direction as the swipe/tap, in one continuous motion, rather
+  than snapping back to place before disappearing. Swipe a row right to
   rename it - reveals a blue pencil button, or a full swipe-through/fast
   flick to the right opens the rename prompt immediately. Both reveals
   span the full width of the row, edge to edge. A swipe that's only
   partly completed stays open rather than snapping shut on its own; it
-  only closes if you tap the row or swipe it back. The first row demos
-  both gestures (delete, then rename) the very first time the Library is
-  ever opened, then only resurfaces occasionally (after a couple of
-  weeks) as a quiet reminder, not on every visit. The Library itself has
-  a drag handle above its title (matching the QR popup's) and an X in
-  the top-right - dragging the handle down closes it with a lighter
-  touch than the QR popup needs.
+  only closes if you tap the row or swipe it back. Any preset saved since
+  the Library was last closed shows a small red "NEW" tag on its row;
+  closing the Library clears those tags and the toolbar's dot together.
+  The first row demos both gestures (delete, then rename) the very first
+  time the Library is ever opened, then only resurfaces occasionally
+  (after a couple of weeks) as a quiet reminder, not on every visit. The
+  Library itself has a drag handle above its title (matching the QR
+  popup's) and an X in the top-right - dragging the handle down closes it
+  with a lighter touch than the QR popup needs, and both handles use a
+  quick interactive spring to snap back so the motion stays smooth rather
+  than lagging.
 - **Style step** - only the Square/Rounded/Custom preset picker shows by
   default; the full set of fine-tune panels (module style, eyes,
   background, logo, border/caption) only appears once Custom is chosen.
-- **Error correction** - an inline L/M/Q/H thermometer under the live
-  preview (not a separate sheet, with a blue bracket calling out that Q
-  and H are the two levels best suited to a center logo), plus a small
-  illustration of roughly how much of the code can be missing, dirty, or
-  covered by a logo at each level and still scan - the illustration
-  pulses gently and bumps when you change levels, to draw the eye to it.
+- **Error correction** - an inline L/M/Q/H thermometer on the "Enter the
+  details" step (scrolls with the rest of the form rather than staying
+  pinned with the live preview, with a blue bracket calling out that Q
+  and H are the two levels best suited to a center logo); the unselected
+  levels carry a slow, subtle gradient pulse toward their end so they
+  don't read as empty. Below it, a small illustration shows roughly how
+  much of the code can be missing, dirty, or covered by a logo at each
+  level and still scan - the illustration pulses gently and bumps when
+  you change levels, to draw the eye to it.
 - **QR scanner** - a floating button on every step opens the camera to scan
   a QR code and open it in Safari; first use explains why the camera
   permission is needed before the system prompt appears, and a success

@@ -13,6 +13,22 @@ struct SavedPreset: Codable, Identifiable, Equatable {
 @Observable
 final class PresetStore {
     private(set) var presets: [SavedPreset] = []
+    private var lastViewedAt: Date = .distantPast
+
+    // Count of presets saved since the Library was last opened, shown as a
+    // red badge on its toolbar icon.
+    var newCount: Int {
+        presets.filter { $0.createdAt > lastViewedAt }.count
+    }
+
+    func isNew(_ preset: SavedPreset) -> Bool {
+        preset.createdAt > lastViewedAt
+    }
+
+    func markLibraryViewed() {
+        lastViewedAt = Date()
+        UserDefaults.standard.set(lastViewedAt, forKey: "libraryLastViewedAt")
+    }
 
     private let fm = FileManager.default
 
@@ -27,7 +43,10 @@ final class PresetStore {
     private var presetsURL: URL { supportDir.appendingPathComponent("presets.json") }
     private var lastURL: URL { supportDir.appendingPathComponent("last-design.json") }
 
-    init() { load() }
+    init() {
+        load()
+        lastViewedAt = (UserDefaults.standard.object(forKey: "libraryLastViewedAt") as? Date) ?? .distantPast
+    }
 
     func load() {
         if let data = try? Data(contentsOf: presetsURL),

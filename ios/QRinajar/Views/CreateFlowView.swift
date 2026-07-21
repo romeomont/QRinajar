@@ -52,13 +52,20 @@ private struct FlowStepView: View {
     @AppColorSchemeStorage private var appearance
     @State private var showLibrary = false
     @State private var shareItem: ShareItem?
-    @State private var showFinishOptions = false
     @State private var showStartAnotherAlert = false
     @State private var showSaveAlert = false
     @State private var saveName = ""
     @State private var showSavedToastFlag = false
     @State private var savedToastMessage = "Added to Library"
     @State private var savedToastWorkItem: DispatchWorkItem?
+    @State private var showFlyToLibrary = false
+    @State private var flyToLibraryAtTarget = false
+
+    // A periodic "New" crossfade over the start-over button, drawing
+    // attention to it without being constant — repeats every 30s rather
+    // than looping continuously.
+    @State private var showStartOverNewLabel = false
+    @State private var startOverBounceScheduled = false
 
     // Tracks the exact design last written to the Library so a repeat
     // Save with nothing changed can say so instead of writing a duplicate.
@@ -88,13 +95,6 @@ private struct FlowStepView: View {
                     .padding(.top, 8)
             }
 
-            if step == .data {
-                @Bindable var design = design
-                ECCThermometer(ecc: $design.ecc)
-                    .padding(.horizontal)
-                    .padding(.top, 12)
-            }
-
             ScrollView {
                 VStack(spacing: 20) {
                     switch step {
@@ -107,6 +107,11 @@ private struct FlowStepView: View {
                         }
                     case .data:
                         ContentDataForm()
+                        // Scrolls with the rest of the form instead of being
+                        // pinned up top with the preview — it doesn't need
+                        // to stay visible the way the live QR preview does.
+                        @Bindable var design = design
+                        ECCThermometer(ecc: $design.ecc)
                     case .style:
                         StylePresetRow { kind in
                             showCustomPanels = (kind == .custom)
@@ -115,29 +120,7 @@ private struct FlowStepView: View {
                             StyleCustomPanels()
                         }
                     case .export:
-                        Button {
-                            showStartAnotherAlert = true
-                        } label: {
-                            VStack(spacing: 10) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 54))
-                                Text("Start Another")
-                                    .font(.headline)
-                            }
-                            .foregroundStyle(brandBlue)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 24)
-                        }
-                        .buttonStyle(.plain)
-                        .alert("Discard this design?", isPresented: $showStartAnotherAlert) {
-                            Button("Discard", role: .destructive) {
-                                design.apply(.factory)
-                                path = []
-                            }
-                            Button("Cancel", role: .cancel) {}
-                        } message: {
-                            Text("Starting another QR code will clear what you have now. Save it first if you want to keep it.")
-                        }
+                        EmptyView()
                     }
                 }
                 .padding()
@@ -158,6 +141,26 @@ private struct FlowStepView: View {
             ScannerButton()
                 .padding(.trailing, 16)
                 .padding(.bottom, step == .type ? 20 : 88)
+        }
+        .overlay(alignment: .top) {
+            // A small icon that flings itself up toward the Library's
+            // toolbar button when a save lands, so the badge's new count
+            // feels connected to the action that caused it (approximate
+            // target — toolbar items aren't reachable for an exact
+            // matchedGeometryEffect across the nav bar boundary).
+            if showFlyToLibrary {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 20))
+                    .foregroundStyle(.white)
+                    .padding(8)
+                    .background(Circle().fill(brandBlue))
+                    .scaleEffect(flyToLibraryAtTarget ? 0.35 : 1)
+                    .opacity(flyToLibraryAtTarget ? 0 : 1)
+                    .offset(
+                        x: flyToLibraryAtTarget ? 150 : 0,
+                        y: flyToLibraryAtTarget ? 8 : 240
+                    )
+            }
         }
         .overlay(alignment: .bottom) {
             if showSavedToastFlag {
@@ -194,7 +197,20 @@ private struct FlowStepView: View {
                 Button {
                     showLibrary = true
                 } label: {
+                    // Extra trailing/top space inside the button's own frame
+                    // (rather than an .offset overlay past its edge) so the
+                    // badge doesn't get clipped by the toolbar's glass pill,
+                    // which masks anything overhanging its rounded bounds.
                     Image(systemName: "books.vertical")
+                        .padding(.top, 6)
+                        .padding(.trailing, 6)
+                        .overlay(alignment: .topTrailing) {
+                            if store.newCount > 0 {
+                                Circle()
+                                    .fill(.red)
+                                    .frame(width: 9, height: 9)
+                            }
+                        }
                 }
             }
         }
@@ -204,6 +220,12 @@ private struct FlowStepView: View {
             // sheet on an imprecise or diagonal swipe.
             LibraryView()
                 .interactiveDismissDisabled()
+        }
+        .onChange(of: showLibrary) { _, isShowing in
+            // Marks viewed on dismiss, not open — so rows can still show a
+            // "New" tag while the Library is open, then both the row tags
+            // and the toolbar badge clear together once it's closed.
+            if !isShowing { store.markLibraryViewed() }
         }
         .onAppear {
             if step == .style {
@@ -245,50 +267,97 @@ private struct FlowStepView: View {
     private var footer: some View {
         Group {
             if step == .export {
-                Button {
-                    showFinishOptions = true
-                } label: {
-                    Text("FINISH")
-                        .font(.headline.weight(.bold))
-                }
-                .buttonStyle(FloatingPillButtonStyle())
-                .confirmationDialog("Finish", isPresented: $showFinishOptions, titleVisibility: .hidden) {
-                    Button("Save") {
-                        // If this exact design is already in the Library
-                        // (nothing's changed since the last Save), say so
-                        // instead of prompting for a name and writing a
-                        // duplicate.
-                        if let last = lastSavedSnapshot, last == design.snapshot {
-                            showSavedToast(message: "Already in Library")
-                            return
+                GeometryReader { geo in
+                    HStack(spacing: 12) {
+                        Spacer(minLength: 0)
+                        // Start-over sits to the left of SAVE — same
+                        // destructive confirm, smaller footprint than its
+                        // old standalone card.
+                        Button {
+                            showStartAnotherAlert = true
+                        } label: {
+                            ZStack {
+                                Image(systemName: "plus")
+                                    .font(.headline.weight(.bold))
+                                    .opacity(showStartOverNewLabel ? 0 : 1)
+                                Text("New")
+                                    .font(.caption.weight(.bold))
+                                    .opacity(showStartOverNewLabel ? 1 : 0)
+                            }
+                            .foregroundStyle(brandBlue)
+                            .frame(width: 60, height: 60)
                         }
-                        // Otherwise prompt for a name via the same "Save to
-                        // Library" alert used when backing out of Style
-                        // with unsaved changes; a brief toast confirms it
-                        // landed without forcing a detour to the Library.
-                        saveName = defaultName()
-                        showSaveAlert = true
+                        .background(Circle().fill(.ultraThinMaterial))
+                        .buttonStyle(.plain)
+                        .onAppear {
+                            guard !startOverBounceScheduled else { return }
+                            startOverBounceScheduled = true
+                            scheduleStartOverBounce()
+                        }
+
+                        Button {
+                            // Save goes straight to the Library — no dialog
+                            // gating it. If nothing's changed since the last
+                            // save, say so instead of writing a duplicate.
+                            if let last = lastSavedSnapshot, last == design.snapshot {
+                                showSavedToast(message: "Already in Library")
+                            } else {
+                                saveName = defaultName()
+                                showSaveAlert = true
+                            }
+                        } label: {
+                            Text("SAVE")
+                                .font(.headline.weight(.bold))
+                        }
+                        .buttonStyle(FloatingPillButtonStyle())
+                        .frame(width: geo.size.width / 2)
+
+                        // Share is a secondary option to the right of Save,
+                        // not a gate in front of it — the native share sheet
+                        // already offers Save Image, Copy, AirDrop, etc.
+                        Button {
+                            if let ui = QRCardRenderer.composeImage(design.snapshot, opaque: false) {
+                                shareItem = ShareItem(image: ui)
+                            }
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.headline.weight(.bold))
+                                .foregroundStyle(brandBlue)
+                                .frame(width: 60, height: 60)
+                        }
+                        .background(Circle().fill(.ultraThinMaterial))
+                        .buttonStyle(.plain)
+                        Spacer(minLength: 0)
                     }
-                    Button("Share") {
-                        // The native share sheet already offers Save Image,
-                        // Copy, AirDrop, etc. as built-in actions, so there's
-                        // no need for a custom Copy/Save/Share picker here.
-                        if let ui = QRCardRenderer.composeImage(design.snapshot, opaque: false) {
-                            shareItem = ShareItem(image: ui)
-                        }
+                }
+                .frame(height: 60)
+                .alert("Discard this design?", isPresented: $showStartAnotherAlert) {
+                    Button("Discard", role: .destructive) {
+                        design.apply(.factory)
+                        path = []
                     }
                     Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("Starting another QR code will clear what you have now. Save it first if you want to keep it.")
                 }
             } else {
-                Button {
-                    if let next = FlowStep(rawValue: step.rawValue + 1) {
-                        path.append(next)
+                GeometryReader { geo in
+                    HStack {
+                        Spacer(minLength: 0)
+                        Button {
+                            if let next = FlowStep(rawValue: step.rawValue + 1) {
+                                path.append(next)
+                            }
+                        } label: {
+                            Text("NEXT")
+                                .font(.headline.weight(.bold))
+                        }
+                        .buttonStyle(FloatingPillButtonStyle())
+                        .frame(width: geo.size.width / 2)
+                        Spacer(minLength: 0)
                     }
-                } label: {
-                    Text("NEXT")
-                        .font(.headline.weight(.bold))
                 }
-                .buttonStyle(FloatingPillButtonStyle())
+                .frame(height: 60)
             }
         }
         .padding(.horizontal, 18)
@@ -300,6 +369,7 @@ private struct FlowStepView: View {
                 store.save(name: name.isEmpty ? defaultName() : name, design: design.snapshot)
                 lastSavedSnapshot = design.snapshot
                 showSavedToast(message: "Added to Library")
+                animateSaveToLibrary()
                 if let target = pendingPopPath {
                     path = target
                     pendingPopPath = nil
@@ -314,6 +384,33 @@ private struct FlowStepView: View {
     private func defaultName() -> String {
         let f = DateFormatter(); f.dateFormat = "MMM d, HH:mm"
         return "Design " + f.string(from: Date())
+    }
+
+    private func scheduleStartOverBounce() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+            // A slow crossfade to "New" directly over the plus icon, then
+            // back — no bounce, just a quiet, unhurried call-out.
+            withAnimation(.easeInOut(duration: 0.8)) {
+                showStartOverNewLabel = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                withAnimation(.easeInOut(duration: 0.8)) {
+                    showStartOverNewLabel = false
+                }
+            }
+            scheduleStartOverBounce()
+        }
+    }
+
+    private func animateSaveToLibrary() {
+        flyToLibraryAtTarget = false
+        showFlyToLibrary = true
+        withAnimation(.easeIn(duration: 0.5)) {
+            flyToLibraryAtTarget = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            showFlyToLibrary = false
+        }
     }
 
     private func showSavedToast(message: String) {

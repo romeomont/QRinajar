@@ -1,6 +1,6 @@
 # Handoff: iOS app status
 
-Last updated: 2026-07-20 (late evening). Everything described here is merged into `master`
+Last updated: 2026-07-21. Everything described here is merged into `master`
 and pushed to `origin/master` — there is no outstanding worktree or branch
 to reconcile. `git log --oneline -20` from repo root will show the recent
 history if you want the blow-by-blow.
@@ -33,41 +33,55 @@ The app is **one linear flow**, not a tab bar:
    (compared against a snapshot captured on `.onAppear`) prompts to save,
    discard, or keep editing before the pop is allowed to complete.
 4. **Share** (`.export`) — title is literally "Share" (`FlowStep.title`),
-   not "Save & export"/"Save & Share" as in earlier iterations. The
-   footer's floating pill (labeled "FINISH") opens a
-   `.confirmationDialog` with Save and Share options: Save first checks
-   `lastSavedSnapshot` — if the current `design.snapshot` already equals
-   what was last written to the Library (nothing's changed since), it
-   just shows an "Already in Library" toast instead of re-prompting and
+   not "Save & export"/"Save & Share" as in earlier iterations. The footer
+   is three buttons centered as a group (via a `GeometryReader`-sized
+   `HStack` with `Spacer()` on both sides, not a full-width row): a plus
+   circle on the left (start over), the `SAVE` pill in the middle (half
+   the `GeometryReader` width, same size the `NEXT` pill uses on the other
+   steps), and a share-icon circle on the right. There is no
+   `.confirmationDialog` anymore — Save and Share are independent actions,
+   not a dialog choice gating one in front of the other. Tapping `SAVE`
+   checks `lastSavedSnapshot` — if the current `design.snapshot` already
+   equals what was last written to the Library (nothing's changed since),
+   it just shows an "Already in Library" toast instead of re-prompting and
    writing a duplicate. Otherwise it opens the same "Save to Library"
    name-prompt alert used when backing out of Style with unsaved changes
-   (`showSaveAlert`/`saveName`, pre-filled with `defaultName()`), stores
-   it via `PresetStore.save`, records `lastSavedSnapshot`, and shows an
-   "Added to Library" toast (`showSavedToast(message:)`, bottom-center,
-   ~1.8s) instead of jumping to the Library — Share builds a `ShareItem`
-   and presents the **native iOS share sheet**
+   (`showSaveAlert`/`saveName`, pre-filled with `defaultName()`), stores it
+   via `PresetStore.save`, records `lastSavedSnapshot`, shows an "Added to
+   Library" toast (`showSavedToast(message:)`, bottom-center, ~1.8s), and
+   plays a small checkmark icon that eases up toward the top-right corner
+   of the screen (`animateSaveToLibrary()`, an approximate fly-to-the-Library-
+   icon flourish — toolbar items aren't reachable for a real
+   `matchedGeometryEffect` across the nav bar boundary). Tapping the share
+   icon builds a `ShareItem` and presents the **native iOS share sheet**
    (`UIActivityViewController` via `ActivityShareSheet` in
-   `Views/ExportView.swift`) — its built-in Copy/Save Image/AirDrop/Print
-   actions replaced a custom Copy/Save/Share picker that used to live
-   here. `ShareItem` (the `Identifiable` image wrapper) and
-   `ActivityShareSheet` are both `internal`, not `private`, specifically
-   so `LibraryView`'s QR popup can reuse them too. Below the preview, a
-   large "Start Another" button (`plus.circle.fill`) resets `design` to
-   `.factory` and pops `path` back to the first step — it always confirms
-   first via an alert (`showStartAnotherAlert`) since it's destructive to
-   whatever's on screen and unsaved. The PNG/JPEG/SVG ShareLink row and
-   the in-app "scan self-test" button were both removed further back —
-   ask before re-adding either without reading the "known issues" section
-   below.
+   `Views/ExportView.swift`) directly, independent of Save — its built-in
+   Copy/Save Image/AirDrop/Print actions replaced a custom Copy/Save/Share
+   picker that used to live here. `ShareItem` and `ActivityShareSheet` are
+   both `internal`, not `private`, specifically so `LibraryView`'s QR
+   popup can reuse them too. The plus button (`showStartAnotherAlert`)
+   resets `design` to `.factory` and pops `path` back to the first step —
+   it always confirms first via an alert since it's destructive to
+   whatever's on screen and unsaved; every 30 seconds
+   (`scheduleStartOverBounce`, recursive `DispatchQueue.main.asyncAfter`,
+   guarded by `startOverBounceScheduled` so re-appearing on this step
+   doesn't stack multiple timers) its icon slowly crossfades to a "New"
+   label and back (`showStartOverNewLabel`, 0.8s each way) rather than
+   looping continuously. The `NEXT` pill on the other three steps is sized
+   and centered the same way (half-width, centered bottom) for visual
+   consistency with `SAVE`. The PNG/JPEG/SVG ShareLink row and the in-app
+   "scan self-test" button were both removed further back — ask before
+   re-adding either without reading the "known issues" section below.
 
-The footer CTA (Next / Share) is a floating pill
-(`FloatingPillButtonStyle` in `Views/Controls.swift`) — solid `brandBlue`,
-16pt corner radius (matches the Style step's preset cards), soft glow
-shadow, inset from the screen edges rather than a full-bleed bar. Saving
-the current design to the Library now only happens from the "Unsaved
-style changes" prompt when backing out of the Style step with unsaved
-edits — there's no standalone "save to library" affordance on the Share
-step anymore.
+The `SAVE`/`NEXT` pills use `FloatingPillButtonStyle`
+(`Views/Controls.swift`) — solid `brandBlue`, 16pt corner radius (matches
+the Style step's preset cards), soft glow shadow — but are no longer
+full-bleed; each is wrapped in a `GeometryReader` and given
+`.frame(width: geo.size.width / 2)` plus `Spacer()`s so it's a centered,
+half-width pill rather than stretching edge to edge. Saving the current
+design to the Library also still happens from the "Unsaved style changes"
+prompt when backing out of the Style step with unsaved edits, same as
+before.
 
 All four steps are pushed onto a real `NavigationStack` (see
 `CreateFlowView.body`, `path: [FlowStep]`), not swapped via `@State` in
@@ -92,20 +106,36 @@ On cold launch: `SplashScreenView` (~2.4s, skipped when
 `WelcomeView` (explains the app, lets you pick light/dark/system) →
 `RootTabView` → `CreateFlowView`.
 
+### Data entry fields (`Views/ContentDataForm.swift`)
+
+Every `TextField` uses the `TextField(_:text:prompt:)` overload with a
+`hint(_:)` helper (`Text(text).foregroundStyle(.secondary.opacity(0.55))`)
+instead of the plain `TextField(placeholder, text:)` initializer — the
+demo values ("https://example.com", "Jane", etc.) render dimmer than typed
+text so they read clearly as an example rather than already-entered
+content. `hint(_:)` is the only place that opacity is set; typed text is
+unaffected and uses the normal label color.
+
 ### Error correction (Enter details step)
 
-`ECCThermometer` in `Views/ContentDataForm.swift` replaced the old
-sheet-based ECC picker: an inline 4-stop L/M/Q/H bar directly under the
-live preview, filling toward the selected level, plus `RecoveryVisual` — a
-small mock module grid with a blue "damage patch" sized (and exaggerated
-~2.2x for legibility) to that level's real recovery percentage. Copy is
-deliberately framed around what can be *missing, dirty, or covered by a
-logo*, not abstract "tolerance." The patch has a continuous gentle
-breathing pulse (`pulse` state, `repeatForever` scale animation) plus a
-quick bump (`bump` state) whenever the selected level changes
-(`.onChange(of: percent)`), so the illustration draws the eye rather than
-sitting static. A `brandBlue` bracket (`LogoBracketShape`, an "⊔"-style
-under-brace) spans the Q and H columns of the thermometer with a "Best
+`ECCThermometer` lives in the same file, now placed *inside* the
+scrollable form content on the "Enter details" step (moved out of
+`CreateFlowView`'s pinned-above-the-preview area — it doesn't need to stay
+visible the way the live QR preview does) — an inline 4-stop L/M/Q/H bar,
+filling toward the selected level, plus `RecoveryVisual` — a small mock
+module grid with a blue "damage patch" sized (and exaggerated ~2.2x for
+legibility) to that level's real recovery percentage. Unselected bars
+aren't flat gray — a `LinearGradient` overlay (`.clear` → `brandBlue`,
+leading to trailing) pulses its opacity slowly (`inactivePulse`, 2.4s
+`easeInOut` `repeatForever`) so they read as "there's more here" without
+competing with the selected bar. Copy is deliberately framed around what
+can be *missing, dirty, or covered by a logo*, not abstract "tolerance."
+The patch has a continuous gentle breathing pulse (`pulse` state,
+`repeatForever` scale animation) plus a quick bump (`bump` state) whenever
+the selected level changes (`.onChange(of: percent)`), so the illustration
+draws the eye rather than sitting static. A `brandBlue` bracket
+(`LogoBracketShape`, an "⊔"-style under-brace) spans the Q and H columns
+of the thermometer with a "Best
 for logos" label beneath — those are the two levels actually worth
 choosing for a center logo, per the info tip copy; L/M are correct QR
 spec levels too (ISO/IEC 18004), not placeholders.
@@ -144,7 +174,28 @@ full swipe-through delete with velocity:
   half-hearted tug on an already-open row could snap it shut even though
   nothing was actually being undone. A revealed row now only closes via
   an explicit tap on the row (treated as "tapping off" it, handled in
-  `handleContentTap`) or by dragging it back — never automatically.
+  `handleContentTap`) or by dragging it back — never automatically. On a
+  committed delete, `onDelete()` is called *inside* the same
+  `withAnimation` that used to only animate the row's own offset — it no
+  longer animates the offset first and removes the array entry after a
+  delay, which left a visible split-second where the row snapped back to
+  place before the list's removal animation played. The row also carries
+  `.transition(.asymmetric(insertion: .opacity, removal: .move(edge: .leading).combined(with: .opacity)))`
+  so the exit continues in the same leftward direction as the swipe/tap
+  that triggered it, in one continuous motion.
+- Any preset saved since the Library was last closed is "new":
+  `PresetStore.isNew(_:)` compares `createdAt` against a private
+  `lastViewedAt` (persisted in `UserDefaults` under
+  `"libraryLastViewedAt"`, exposed via `markLibraryViewed()` and the
+  computed `newCount`). Rows for new presets show a small red "NEW"
+  capsule next to the name. `CreateFlowView` calls
+  `store.markLibraryViewed()` on **dismiss** of the Library sheet, not on
+  open (`.onChange(of: showLibrary) { _, isShowing in if !isShowing {...} }`)
+  — so rows can still show "NEW" while you're actually looking at the
+  list, and both the row tags and the toolbar badge clear together only
+  once you close it. The `books.vertical` toolbar icon
+  (`CreateFlowView`) shows a plain small red dot (no count) when
+  `store.newCount > 0` — deliberately not a numbered badge.
 - **Shake to undo** (delete only): `Views/ShakeDetector.swift` bridges
   UIKit's `motionEnded`/`.motionShake` (there's no SwiftUI shake gesture)
   to a `NotificationCenter` post and a `View.onShake { }` modifier.
@@ -163,10 +214,16 @@ full swipe-through delete with velocity:
 - Tapping a row's QR icon opens `QRPopupCard` — a bottom-anchored card
   over a dimmed scrim, flush against the bottom safe area (top corners
   only rounded via `.rect(topLeadingRadius:topTrailingRadius:)`), with its
-  own Share button. Tapping the scrim dismisses it, and so does dragging
-  its top handle down (past 60pt of translation, or a `predictedEndTranslation`
-  past 140pt for a fast flick) — the handle's `dragOffset` moves the whole
-  card with the finger and springs back if the drag doesn't commit.
+  own Share button — sized/shaped like the SAVE/NEXT pills elsewhere
+  (`FloatingPillButtonStyle`, half-width via a `GeometryReader`, centered
+  with `Spacer()`s), not the old full-bleed `.borderedProminent` bar.
+  Tapping the scrim dismisses it, and so does dragging its top handle down
+  (past 60pt of translation, or a `predictedEndTranslation` past 140pt for
+  a fast flick) — the handle's `dragOffset` moves the whole card with the
+  finger and springs back (`.interactiveSpring(response: 0.28,
+  dampingFraction: 0.9, blendDuration: 0)`, not a full physics spring —
+  it settles in fewer frames, which is what made the snap-back feel laggy)
+  if the drag doesn't commit.
 - The Library's own `.sheet` presentation has `.interactiveDismissDisabled()`
   set (in `CreateFlowView`) — without it, a diagonal or imprecise row
   swipe could get partly read by iOS as a downward drag-to-dismiss on the
@@ -175,18 +232,20 @@ full swipe-through delete with velocity:
   `NavigationStack` entirely (same position/shape as `QRPopupCard`'s,
   not tucked under the "Library" title), dragging the whole card down
   (`dragOffset` applied to the outer `VStack` wrapping the handle +
-  `NavigationStack`) dismisses it. Thresholds are 20% lighter than
-  `QRPopupCard`'s — 48pt translation or a 112pt predicted flick, vs.
-  60/140 — so the Library closes with less effort. The toolbar X button
-  is now `.topBarTrailing` (top-right, matching the QR popup convention)
-  rather than leading, and does **not** have `GlassButtonStyle` applied
+  `NavigationStack`) dismisses it, springing back with the same lighter
+  `.interactiveSpring` as `QRPopupCard`'s handle. Thresholds are 20%
+  lighter than `QRPopupCard`'s — 48pt translation or a 112pt predicted
+  flick, vs. 60/140 — so the Library closes with less effort. The toolbar
+  X button is now `.topBarTrailing` (top-right, matching the QR popup
+  convention) rather than leading, and does **not** have `GlassButtonStyle` applied
   (that modifier is only for standalone controls; a `ToolbarItem` already
   gets Liquid Glass automatically, and stacking both drew two overlapping
   glass shapes).
 - "Save current design" and "Reset to factory" were removed from the
-  Library menu — saving now only happens from the Share step's FINISH
-  dialog, which no longer auto-navigates to the Library on save (see
-  Share step above) — it shows a toast instead.
+  Library menu — saving now only happens from the Share step's SAVE
+  button (see Share step above), which doesn't navigate to the Library on
+  save — it shows a toast (and a small fly-to-Library checkmark flourish)
+  instead.
 
 ## Known issues / deliberately untested paths
 
