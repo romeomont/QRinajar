@@ -22,8 +22,43 @@ struct LibraryView: View {
     @State private var lastDeleted: (preset: SavedPreset, index: Int)?
     @State private var undoWorkItem: DispatchWorkItem?
 
+    // The sheet itself has interactiveDismissDisabled() (see
+    // CreateFlowView) so row swipes can't accidentally close it — this
+    // handle is the deliberate replacement for that gesture.
+    @State private var dragOffset: CGFloat = 0
+
     var body: some View {
-        NavigationStack {
+        VStack(spacing: 0) {
+            // Sits above the nav bar entirely, same position/shape as
+            // QRPopupCard's handle, rather than tucked under the "Library"
+            // title.
+            Capsule()
+                .fill(Color.secondary.opacity(0.4))
+                .frame(width: 40, height: 5)
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            guard value.translation.height > 0 else { return }
+                            dragOffset = value.translation.height
+                        }
+                        .onEnded { value in
+                            // 20% less than QRPopupCard's handle (60/140) —
+                            // the Library sheet closes with a lighter touch.
+                            let flungDown = value.predictedEndTranslation.height > 112
+                            if value.translation.height > 48 || flungDown {
+                                dismiss()
+                            } else {
+                                withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                                    dragOffset = 0
+                                }
+                            }
+                        }
+                )
+
+            NavigationStack {
             ZStack(alignment: .bottom) {
             List {
                 if store.presets.isEmpty {
@@ -59,7 +94,7 @@ struct LibraryView: View {
             .navigationTitle("Library")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .topBarTrailing) {
                     // No GlassButtonStyle here — toolbar items already get
                     // Liquid Glass automatically; adding it again stacked a
                     // second glass shape behind the icon.
@@ -82,6 +117,10 @@ struct LibraryView: View {
             }
             }
         }
+        }
+        // Applied to the whole card (handle + nav bar + content) so it all
+        // moves down together with the drag, same as QRPopupCard.
+        .offset(y: dragOffset)
     }
 
     private func performDelete(_ preset: SavedPreset, at index: Int) {
@@ -360,6 +399,10 @@ struct QRPopupCard: View {
     let onDismiss: () -> Void
 
     @State private var shareImage: ShareableImage?
+    // Follows the finger while dragging the handle down; committing to
+    // dismiss (past a threshold, or a fast downward flick) hands off to
+    // onDismiss, otherwise the card springs back up.
+    @State private var dragOffset: CGFloat = 0
 
     private var image: UIImage? {
         QRCardRenderer.composeImage(preset.design, opaque: false)
@@ -377,6 +420,25 @@ struct QRPopupCard: View {
                     .fill(Color.secondary.opacity(0.4))
                     .frame(width: 40, height: 5)
                     .padding(.top, 10)
+                    .padding(.bottom, 6)
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                guard value.translation.height > 0 else { return }
+                                dragOffset = value.translation.height
+                            }
+                            .onEnded { value in
+                                let flungDown = value.predictedEndTranslation.height > 140
+                                if value.translation.height > 60 || flungDown {
+                                    onDismiss()
+                                } else {
+                                    withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                                        dragOffset = 0
+                                    }
+                                }
+                            }
+                    )
 
                 if let ui = image {
                     Image(uiImage: ui)
@@ -408,6 +470,7 @@ struct QRPopupCard: View {
             .frame(maxWidth: .infinity)
             .background(.regularMaterial)
             .clipShape(.rect(topLeadingRadius: 28, topTrailingRadius: 28))
+            .offset(y: dragOffset)
             // Flush against the bottom edge, like the AirPods card — no
             // side margins, no rounded bottom corners.
             .ignoresSafeArea(edges: .bottom)

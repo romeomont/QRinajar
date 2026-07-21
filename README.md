@@ -76,26 +76,31 @@ Other things worth knowing:
 - **Share step** - the last step's FINISH button opens a native
   Save/Share choice: Save prompts for a name (pre-filled with a default),
   adds it to the Library, and shows a brief "Added to Library" toast
-  instead of jumping there; Share opens the native iOS share sheet.
-  Below that, a "Start Another" button resets to a blank design and
-  returns to step one - it always asks to confirm first, since it
-  discards the current design.
-- **Library** - saved presets (reachable from any step via the toolbar);
-  tap a row to load it and return to editing, or tap its QR icon for a
-  quick full-preview in a bottom popup card (share it straight from
-  there, or tap outside to dismiss). Swipe a row left to delete it - only
-  a full swipe-through with real inertia (a fast flick) deletes; a slow
-  drag that merely crosses the halfway point just reveals the Delete
-  button (tap it to confirm) rather than deleting outright, no
-  confirmation alert either way; shake the device to undo. Swipe a row
-  right to rename it - reveals a blue pencil button, or a full
-  swipe-through/fast flick to the right opens the rename prompt
-  immediately. Both reveals span the full width of the row, edge to edge.
-  A swipe that's only partly completed stays open rather than snapping
-  shut on its own; it only closes if you tap the row or swipe it back.
-  The first row demos both gestures (delete, then rename) the very first
-  time the Library is ever opened, then only resurfaces occasionally
-  (after a couple of weeks) as a quiet reminder, not on every visit.
+  instead of jumping there - if nothing's changed since the last save,
+  it says "Already in Library" instead of writing a duplicate. Share
+  opens the native iOS share sheet. Below that, a "Start Another" button
+  resets to a blank design and returns to step one - it always asks to
+  confirm first, since it discards the current design.
+- **Library** - saved presets (reachable from any step via the
+  `books.vertical` toolbar icon); tap a row to load it and return to
+  editing, or tap its QR icon for a quick full-preview in a bottom popup
+  card (share it straight from there, drag its handle down or tap
+  outside to dismiss). Swipe a row left to delete it - only a full
+  swipe-through with real inertia (a fast flick) deletes; a slow drag
+  that merely crosses the halfway point just reveals the Delete button
+  (tap it to confirm) rather than deleting outright, no confirmation
+  alert either way; shake the device to undo. Swipe a row right to
+  rename it - reveals a blue pencil button, or a full swipe-through/fast
+  flick to the right opens the rename prompt immediately. Both reveals
+  span the full width of the row, edge to edge. A swipe that's only
+  partly completed stays open rather than snapping shut on its own; it
+  only closes if you tap the row or swipe it back. The first row demos
+  both gestures (delete, then rename) the very first time the Library is
+  ever opened, then only resurfaces occasionally (after a couple of
+  weeks) as a quiet reminder, not on every visit. The Library itself has
+  a drag handle above its title (matching the QR popup's) and an X in
+  the top-right - dragging the handle down closes it with a lighter
+  touch than the QR popup needs.
 - **Style step** - only the Square/Rounded/Custom preset picker shows by
   default; the full set of fine-tune panels (module style, eyes,
   background, logo, border/caption) only appears once Custom is chosen.

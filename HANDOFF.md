@@ -1,6 +1,6 @@
 # Handoff: iOS app status
 
-Last updated: 2026-07-20 (evening). Everything described here is merged into `master`
+Last updated: 2026-07-20 (late evening). Everything described here is merged into `master`
 and pushed to `origin/master` — there is no outstanding worktree or branch
 to reconcile. `git log --oneline -20` from repo root will show the recent
 history if you want the blow-by-blow.
@@ -35,13 +35,17 @@ The app is **one linear flow**, not a tab bar:
 4. **Share** (`.export`) — title is literally "Share" (`FlowStep.title`),
    not "Save & export"/"Save & Share" as in earlier iterations. The
    footer's floating pill (labeled "FINISH") opens a
-   `.confirmationDialog` with Save and Share options: Save opens the same
-   "Save to Library" name-prompt alert used when backing out of Style
-   with unsaved changes (`showSaveAlert`/`saveName`, pre-filled with
-   `defaultName()`), stores it via `PresetStore.save`, and shows a brief
-   "Added to Library" toast (`showSavedToast()`, bottom-center, ~1.8s)
-   instead of jumping to the Library — Share builds a `ShareItem` and
-   presents the **native iOS share sheet**
+   `.confirmationDialog` with Save and Share options: Save first checks
+   `lastSavedSnapshot` — if the current `design.snapshot` already equals
+   what was last written to the Library (nothing's changed since), it
+   just shows an "Already in Library" toast instead of re-prompting and
+   writing a duplicate. Otherwise it opens the same "Save to Library"
+   name-prompt alert used when backing out of Style with unsaved changes
+   (`showSaveAlert`/`saveName`, pre-filled with `defaultName()`), stores
+   it via `PresetStore.save`, records `lastSavedSnapshot`, and shows an
+   "Added to Library" toast (`showSavedToast(message:)`, bottom-center,
+   ~1.8s) instead of jumping to the Library — Share builds a `ShareItem`
+   and presents the **native iOS share sheet**
    (`UIActivityViewController` via `ActivityShareSheet` in
    `Views/ExportView.swift`) — its built-in Copy/Save Image/AirDrop/Print
    actions replaced a custom Copy/Save/Share picker that used to live
@@ -74,8 +78,8 @@ Persistent across every step (via `.overlay` in `FlowStepView`):
 - A floating **scanner button** (bottom-trailing) — `Views/QRScanner.swift`.
   Explains the camera permission before requesting it, decodes via
   AVFoundation, opens the result in Safari, fires a success haptic.
-- Toolbar **appearance toggle** and **tray** (Library) icons, top-trailing,
-  auto-grouped into one glass pill by the system. The appearance icon
+- Toolbar **appearance toggle** and **Library** (`books.vertical`) icons,
+  top-trailing, auto-grouped into one glass pill by the system. The appearance icon
   shows sun in dark mode / moon in light mode (the mode a tap moves
   *toward*) and switches directly — there is no Settings screen anymore;
   `SettingsView.swift` was deleted. Tapping sets `AppColorSchemeStorage`
@@ -159,15 +163,26 @@ full swipe-through delete with velocity:
 - Tapping a row's QR icon opens `QRPopupCard` — a bottom-anchored card
   over a dimmed scrim, flush against the bottom safe area (top corners
   only rounded via `.rect(topLeadingRadius:topTrailingRadius:)`), with its
-  own Share button. Tapping the scrim dismisses it.
+  own Share button. Tapping the scrim dismisses it, and so does dragging
+  its top handle down (past 60pt of translation, or a `predictedEndTranslation`
+  past 140pt for a fast flick) — the handle's `dragOffset` moves the whole
+  card with the finger and springs back if the drag doesn't commit.
 - The Library's own `.sheet` presentation has `.interactiveDismissDisabled()`
   set (in `CreateFlowView`) — without it, a diagonal or imprecise row
   swipe could get partly read by iOS as a downward drag-to-dismiss on the
-  sheet itself, closing the whole Library. The toolbar X button is the
-  only way to dismiss it now — it does **not** have `GlassButtonStyle`
-  applied (that modifier is only for standalone controls; a `ToolbarItem`
-  already gets Liquid Glass automatically, and stacking both drew two
-  overlapping glass shapes).
+  sheet itself, closing the whole Library. In its place, `LibraryView`
+  has its own drag handle — a capsule positioned *above* the
+  `NavigationStack` entirely (same position/shape as `QRPopupCard`'s,
+  not tucked under the "Library" title), dragging the whole card down
+  (`dragOffset` applied to the outer `VStack` wrapping the handle +
+  `NavigationStack`) dismisses it. Thresholds are 20% lighter than
+  `QRPopupCard`'s — 48pt translation or a 112pt predicted flick, vs.
+  60/140 — so the Library closes with less effort. The toolbar X button
+  is now `.topBarTrailing` (top-right, matching the QR popup convention)
+  rather than leading, and does **not** have `GlassButtonStyle` applied
+  (that modifier is only for standalone controls; a `ToolbarItem` already
+  gets Liquid Glass automatically, and stacking both drew two overlapping
+  glass shapes).
 - "Save current design" and "Reset to factory" were removed from the
   Library menu — saving now only happens from the Share step's FINISH
   dialog, which no longer auto-navigates to the Library on save (see

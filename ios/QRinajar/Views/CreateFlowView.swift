@@ -57,7 +57,12 @@ private struct FlowStepView: View {
     @State private var showSaveAlert = false
     @State private var saveName = ""
     @State private var showSavedToastFlag = false
+    @State private var savedToastMessage = "Added to Library"
     @State private var savedToastWorkItem: DispatchWorkItem?
+
+    // Tracks the exact design last written to the Library so a repeat
+    // Save with nothing changed can say so instead of writing a duplicate.
+    @State private var lastSavedSnapshot: DesignSnapshot?
 
     // Guards against losing style edits: captured when this step appears,
     // compared against the live design when the user backs out.
@@ -156,7 +161,7 @@ private struct FlowStepView: View {
         }
         .overlay(alignment: .bottom) {
             if showSavedToastFlag {
-                Label("Added to Library", systemImage: "checkmark.circle.fill")
+                Label(savedToastMessage, systemImage: "checkmark.circle.fill")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 18)
@@ -189,7 +194,7 @@ private struct FlowStepView: View {
                 Button {
                     showLibrary = true
                 } label: {
-                    Image(systemName: "tray.full")
+                    Image(systemName: "books.vertical")
                 }
             }
         }
@@ -249,10 +254,18 @@ private struct FlowStepView: View {
                 .buttonStyle(FloatingPillButtonStyle())
                 .confirmationDialog("Finish", isPresented: $showFinishOptions, titleVisibility: .hidden) {
                     Button("Save") {
-                        // Prompts for a name via the same "Save to Library"
-                        // alert used when backing out of Style with unsaved
-                        // changes; a brief toast confirms it landed without
-                        // forcing a detour to the Library.
+                        // If this exact design is already in the Library
+                        // (nothing's changed since the last Save), say so
+                        // instead of prompting for a name and writing a
+                        // duplicate.
+                        if let last = lastSavedSnapshot, last == design.snapshot {
+                            showSavedToast(message: "Already in Library")
+                            return
+                        }
+                        // Otherwise prompt for a name via the same "Save to
+                        // Library" alert used when backing out of Style
+                        // with unsaved changes; a brief toast confirms it
+                        // landed without forcing a detour to the Library.
                         saveName = defaultName()
                         showSaveAlert = true
                     }
@@ -285,7 +298,8 @@ private struct FlowStepView: View {
             Button("Save") {
                 let name = saveName.trimmingCharacters(in: .whitespaces)
                 store.save(name: name.isEmpty ? defaultName() : name, design: design.snapshot)
-                showSavedToast()
+                lastSavedSnapshot = design.snapshot
+                showSavedToast(message: "Added to Library")
                 if let target = pendingPopPath {
                     path = target
                     pendingPopPath = nil
@@ -302,8 +316,9 @@ private struct FlowStepView: View {
         return "Design " + f.string(from: Date())
     }
 
-    private func showSavedToast() {
+    private func showSavedToast(message: String) {
         savedToastWorkItem?.cancel()
+        savedToastMessage = message
         withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
             showSavedToastFlag = true
         }
