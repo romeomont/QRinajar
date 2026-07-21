@@ -52,6 +52,7 @@ private struct FlowStepView: View {
     @AppColorSchemeStorage private var appearance
     @State private var showLibrary = false
     @State private var shareItem: ShareItem?
+    @State private var showFinishOptions = false
     @State private var showSaveAlert = false
     @State private var saveName = ""
 
@@ -135,6 +136,19 @@ private struct FlowStepView: View {
         .navigationBarTitleDisplayMode(.inline)
         .background(BackdropGradient())
         .toolbar {
+            if step != .type {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        // Starts a genuinely new code, not just a blank
+                        // form pre-loaded with whatever was last edited.
+                        design.apply(.factory)
+                        path = []
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .modifier(GlassButtonStyle())
+                }
+            }
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     // Tapping switches straight to the opposite of whatever
@@ -199,17 +213,30 @@ private struct FlowStepView: View {
         Group {
             if step == .export {
                 Button {
-                    // The native share sheet already offers Save Image,
-                    // Copy, AirDrop, etc. as built-in actions, so there's
-                    // no need for a custom Copy/Save/Share picker here.
-                    if let ui = QRCardRenderer.composeImage(design.snapshot, opaque: false) {
-                        shareItem = ShareItem(image: ui)
-                    }
+                    showFinishOptions = true
                 } label: {
-                    Text("SHARE")
+                    Text("FINISH")
                         .font(.headline.weight(.bold))
                 }
                 .buttonStyle(FloatingPillButtonStyle())
+                .confirmationDialog("Finish", isPresented: $showFinishOptions, titleVisibility: .hidden) {
+                    Button("Save") {
+                        // Auto-named, no prompt — Finish is meant to be a
+                        // single tap, and the Library shows the result
+                        // immediately after so the user can rename there.
+                        store.save(name: defaultName(), design: design.snapshot)
+                        showLibrary = true
+                    }
+                    Button("Share") {
+                        // The native share sheet already offers Save Image,
+                        // Copy, AirDrop, etc. as built-in actions, so there's
+                        // no need for a custom Copy/Save/Share picker here.
+                        if let ui = QRCardRenderer.composeImage(design.snapshot, opaque: false) {
+                            shareItem = ShareItem(image: ui)
+                        }
+                    }
+                    Button("Cancel", role: .cancel) {}
+                }
             } else {
                 Button {
                     if let next = FlowStep(rawValue: step.rawValue + 1) {
