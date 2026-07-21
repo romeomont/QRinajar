@@ -15,16 +15,13 @@ gradients, corner eyes, center logo, caption + border) and content presets
 for common use cases (website, plain text, Wi-Fi, vCard contact, social
 profile).
 
-Available three ways:
+Available two ways:
 
 - **Windows app** - installer or portable exe, no browser needed.
 - **Single HTML file** - `dist/qrinajar.html`, zero dependencies at
   runtime. Copy it to a laptop, phone, or USB stick and open it in any
   browser. No internet is ever used: the QR library (qr-code-styling), the
   scan-test decoder (jsQR), and all UI are inlined into the file.
-- **iOS app** - native SwiftUI app for iPhone/iPad. Moved out to its own
-  private repo, `romeomont/ios-QRinajar` (branch `dev`) - not in this repo
-  anymore.
 
 ## Windows app
 
@@ -56,15 +53,6 @@ npm install
 npm run dist:win     # -> release/QRinajarInstaller.exe (installer)
                       #    release/QRinajarPortable.exe (portable)
 ```
-
-## iOS app
-
-Moved to its own private repo: `romeomont/ios-QRinajar`, working branch
-`dev`. It's a native SwiftUI port targeting iOS 18+, following iOS 26
-Liquid Glass design conventions, using
-[dagronf/QRCode](https://github.com/dagronf/QRCode) for rendering. See
-that repo's own README/HANDOFF for the full feature rundown and dev
-setup — this repo no longer contains the iOS project.
 
 ## Features
 
