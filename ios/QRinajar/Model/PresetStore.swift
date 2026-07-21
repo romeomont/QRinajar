@@ -64,6 +64,14 @@ final class PresetStore {
         persist()
     }
 
+    func rename(_ preset: SavedPreset, to newName: String) {
+        guard let index = presets.firstIndex(where: { $0.id == preset.id }) else { return }
+        let trimmed = newName.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        presets[index].name = trimmed
+        persist()
+    }
+
     // Last-design auto-persist (mirrors the web app localStorage boot behaviour).
     func saveLast(_ design: DesignSnapshot) {
         if let data = try? JSONEncoder().encode(design) {

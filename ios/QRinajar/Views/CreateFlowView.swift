@@ -107,7 +107,21 @@ private struct FlowStepView: View {
                             StyleCustomPanels()
                         }
                     case .export:
-                        EmptyView()
+                        Button {
+                            design.apply(.factory)
+                            path = []
+                        } label: {
+                            VStack(spacing: 10) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 54))
+                                Text("Start Another")
+                                    .font(.headline)
+                            }
+                            .foregroundStyle(brandBlue)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 24)
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
                 .padding()
@@ -136,19 +150,6 @@ private struct FlowStepView: View {
         .navigationBarTitleDisplayMode(.inline)
         .background(BackdropGradient())
         .toolbar {
-            if step != .type {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        // Starts a genuinely new code, not just a blank
-                        // form pre-loaded with whatever was last edited.
-                        design.apply(.factory)
-                        path = []
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                    .modifier(GlassButtonStyle())
-                }
-            }
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
                     // Tapping switches straight to the opposite of whatever

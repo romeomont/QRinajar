@@ -35,7 +35,8 @@ struct LibraryView: View {
                                     }
                                 },
                                 onDelete: { performDelete(preset, at: index) },
-                                onDemoFinished: { hasSeenSwipeDemo = true }
+                                onDemoFinished: { hasSeenSwipeDemo = true },
+                                onRename: { newName in store.rename(preset, to: newName) }
                             )
                         }
                     } header: {
@@ -101,11 +102,22 @@ private struct LibraryRow: View {
     let onShowQR: () -> Void
     let onDelete: () -> Void
     let onDemoFinished: () -> Void
+    let onRename: (String) -> Void
 
     @State private var offset: CGFloat = 0
     @State private var rowWidth: CGFloat = 360
     private let deleteWidth: CGFloat = 84
     private let rowHeight: CGFloat = 76
+
+    // A normal tap still opens the preset, but it's held for a moment in
+    // case a second tap follows — retapping within that window means
+    // "rename this," not "open this," so the pencil appears instead.
+    @State private var lastTapDate: Date?
+    @State private var pendingOpenWork: DispatchWorkItem?
+    @State private var showRenameIcon = false
+    @State private var showRenameAlert = false
+    @State private var renameText = ""
+    private let rapidTapWindow: TimeInterval = 2
 
     // Only visible once the row has actually started sliding — at rest
     // there's no red anywhere, revealed only as the user (or the demo)
@@ -138,7 +150,7 @@ private struct LibraryRow: View {
             }
             .opacity(revealAmount)
 
-            Button(action: onOpen) {
+            Button(action: handleTap) {
                 HStack(spacing: 12) {
                     VStack(alignment: .leading, spacing: 3) {
                         Text(preset.name).font(.title3.weight(.semibold)).foregroundStyle(.primary)
@@ -146,6 +158,19 @@ private struct LibraryRow: View {
                             .font(.subheadline).foregroundStyle(.secondary)
                     }
                     Spacer()
+                    if showRenameIcon {
+                        Button {
+                            renameText = preset.name
+                            showRenameAlert = true
+                        } label: {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(brandBlue)
+                                .frame(width: 44, height: 44)
+                        }
+                        .buttonStyle(.plain)
+                        .transition(.scale.combined(with: .opacity))
+                    }
                     Button(action: onShowQR) {
                         Image(systemName: "qrcode")
                             .font(.title2)
@@ -216,6 +241,31 @@ private struct LibraryRow: View {
                 }
             }
         }
+        .alert("Rename preset", isPresented: $showRenameAlert) {
+            TextField("Name", text: $renameText)
+            Button("Save") { onRename(renameText) }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    private func handleTap() {
+        let now = Date()
+        if let last = lastTapDate, now.timeIntervalSince(last) < rapidTapWindow {
+            // Second tap arrived in time — this is a rename request, not
+            // an open request, so cancel the pending open entirely.
+            pendingOpenWork?.cancel()
+            lastTapDate = nil
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                showRenameIcon = true
+            }
+            return
+        }
+        lastTapDate = now
+        // Hold the open action just long enough for a second tap to
+        // preempt it; if none comes, it fires on its own.
+        let work = DispatchWorkItem { onOpen() }
+        pendingOpenWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + rapidTapWindow, execute: work)
     }
 }
 
